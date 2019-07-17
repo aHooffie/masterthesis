@@ -1,0 +1,52 @@
+game Hanabi
+
+typedef Value = [1, 2, 3, 4, 5]
+typedef Colour = [blue, green, red, white, yellow]
+
+deck allCards = 
+[
+	B1 = [blue, 1],
+	B2 = [blue, 2],
+	B3 = [blue, 3],
+	B4 = [blue, 4],
+	B5 = [blue, 5],
+	G1 = [green, 1],
+	G2 = [green, 2],
+	G3 = [green, 3],
+	G4 = [green, 4],
+	G5 = [green, 5],
+	R1 = [red, 1],
+	R2 = [red, 2],
+	R3 = [red, 3],
+	R4 = [red, 4],
+	R5 = [red, 5],
+	W1 = [white, 1],
+	W2 = [white, 2],
+	W3 = [white, 3],
+	W4 = [white, 4],
+	W5 = [white, 5],
+	Y1 = [yellow, 1],
+	Y2 = [yellow, 2],
+	Y3 = [yellow, 3],
+	Y4 = [yellow, 4],
+	Y5 = [yellow, 5]
+] table none []
+
+deck blue = [] table none []
+deck green = [] table none []
+deck red = [] table none []
+deck white = [] table none []
+deck yellow = [] table none []
+
+deck playerA = [] playerA none []
+deck playerB = [] playerB  none []
+deck playerC = [] playerC none []
+
+team allPlayers = [A, B, C]
+
+players = 
+[	
+	A = [],
+	B = [],
+	C = []
+]

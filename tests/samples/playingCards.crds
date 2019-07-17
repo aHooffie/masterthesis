@@ -1,0 +1,54 @@
+game playingCards
+
+typedef Value = [2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K, A]
+typedef Colour = [hearts, diamonds, clubs, spades]
+
+// SLC
+
+/* MLC */
+
+deck drawPile = 
+[
+	D2 = [diamonds, 2],
+	DA = [diamonds, A]
+] LOCATION none []
+
+deck discardPile = [] LOCATION none []
+deck playerA = [] LOCATION hand []
+deck playerB = [] LOCATION hand [] 
+deck playerC = [] LOCATION hand []
+
+tokens ID = 
+[
+	tokenSet1 = [3] LOCATION all [],
+	toksenSet2 = [8] LOCATION none []
+]
+
+team 1 = [A, B, C]
+team 2 = [A]
+
+players = 
+[	
+	A = [],
+	B = [],
+	C = []
+]
+
+rules = 
+[
+	players: 2 to 5,
+	scoring: [2 = 2, 3 = 3, 4 = 4, 5 = 5, J = 10, Q = 10, K = 10, A = 11]
+]
+
+gameflow = [
+	turnorder = [ A, B, C]
+	stage begin: while condition dealer [ 
+		req shuffle ID, 
+		req distribute 5 DECK [A, B, C]
+	],
+	stage mid: while condition turns [
+		req moveCard ID ID ID,
+		opt moveToken ID ID ID,
+		opt getInfo ID knowledge
+	]
+]
