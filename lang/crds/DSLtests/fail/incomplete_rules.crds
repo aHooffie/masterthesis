@@ -1,0 +1,12 @@
+game incomplete_rules
+
+
+// Some of the decls are used.
+
+team winners = [A]
+players = [A]
+gameflow = [ all ]
+rules = [ scoring = ]
+tokens = [ 
+	T1 = [4] locatie all []
+]

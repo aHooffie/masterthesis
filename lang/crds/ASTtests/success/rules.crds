@@ -1,0 +1,9 @@
+game testrules
+
+rules = [
+	players = 3 to 10000,
+	scoring =  [ bla = 1, two = 2, win = 100 ] 
+]
+
+rules = [ players = 1 to 2 ]
+rules = [ scoring =  [great = 10, amazing = 100] ]

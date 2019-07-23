@@ -1,0 +1,46 @@
+game mixed_order
+
+// THIS IS VERY ANNOYING AND SHOULD BE PUNISHED.
+
+
+deck alles = [
+	heart4 = [hearts, 4],
+	club6 = [clubs, 6],
+	spades10 = [spades, 10],
+	diamondsking = [diamonds, king]
+] startingpile everyone [while condition, while 24, if 3 <= 4 then takeCard startingpile handplayerA ]
+
+
+typedef values = [1 .. 100]
+
+
+rules = [ players = 1 to 2 ]
+
+gameflow = [
+	turnorder = [A, B, C]
+	stage name = while 3 < 4 dealer [ opt shuffle DECK1 ]
+ ]
+
+
+players = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
+
+team uno = [A, B, C, D]
+
+deck handplayerF = [] handplayerF hand []
+
+team duo = [Q]
+
+tokens = 
+[
+	T1 = [3] P0 all everyone draw [],
+	T2 = [1000] P1 team hand return [while 4 == 3],
+	T3 = [0] P2 use [if 10 != 11 then shuffle Deck123],
+	T444 = [3] P0 all everyone draw [],
+	T5 = [1000] P1 team hand return [while 4 == 3],
+	TQADSBU = [0] P2 use [if 10 != 11 then shuffle Deck123]
+]
+
+rules = [ scoring =  [great = 10, amazing = 100] ]
+
+
+typedef values = [1 .. 100]

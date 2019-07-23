@@ -1,0 +1,7 @@
+game testtypedef
+
+typedef VALUES = [ 1 .. 100 ]
+
+typedef COLOURS = [red, white, green, blue, yellow]
+
+typedef NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

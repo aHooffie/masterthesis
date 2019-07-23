@@ -1,0 +1,7 @@
+game comments
+
+// This is a single line comment.
+
+/* This is a multi-line comment.
+	This means that it stretches.
+	Across multiple lines. */

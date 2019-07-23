@@ -1,0 +1,11 @@
+game no_visibility
+
+// Some of the decls are used.
+
+team winners = [A]
+players = [A]
+gameflow = [ all ]
+rules = [ players = 1 to 1, scoring = [D4 = 4, H7 = 7, S2 = 2, CA = 11]]
+tokens = [ 
+	T1 = [4] locatie []
+]
