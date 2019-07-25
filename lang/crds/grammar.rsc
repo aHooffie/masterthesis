@@ -51,18 +51,18 @@ syntax Turn
  | opt: "opt" Action
  | choice: VALUE "of" "[" {Action ","}+ "]";
  
-syntax Action												// Specific rules
- = @Category="Action" shuffleDeck: "shuffle" ID 			// DeckID
- | distributeCards: "distribute" VALUE ID "[" {ID ","}+ "]" 	// CardAmount, DeckID , List of Players
- | takeCard: "takeCard" ID ID   						// Deck, deck
- | moveCard: "moveCard" ID ID ID  					// Deck, deck, object
- | moveToken: "moveToken" ID ID ID 					// Object, deck, deck?
+syntax Action																// Specific rules
+ = @Category="Action" shuffleDeck: "shuffle" ID 							// DeckID
+ | distributeCards: "distribute" VALUE ID "[" {ID ","}+ "]" 				// CardAmount, DeckID , List of Players
+ | takeCard: "takeCard" ID ID
+ | moveCard: "moveCard" VALUE ID ID
+ | moveToken: "moveToken" VALUE ID ID
  | useToken: "useToken" ID
  | returnToken: "returnToken" ID
- | obtainKnowledge: "getInfo" ID 					// TO DO !!
- | communicate: "TO DO" ID ID 						// Object, quality. Loc / deck ID necessary?
- | changeTurnorder: "changeTurns" Turnorder 		// TO DO: How to skip a player's turn once?
- | calculateScore: "calculateScore" ID+	// How to count score? What if there are no teams?
+ | obtainKnowledge: "getInfo" ID
+ | communicate: "giveHint" ID Attr
+ | changeTurnorder: "changeTurns" Turnorder
+ | calculateScore: "calculateScore" ID+
  | endGame: "endGame"; 	
  					
 /******************************************************************************

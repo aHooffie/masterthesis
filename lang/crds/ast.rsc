@@ -83,12 +83,12 @@ data Action
  = shuffleDeck(ID name)
  | distributeCards(real r, ID name, list[ID] players)
  | takeCard(ID from, ID to)
- | moveCard(ID object, ID from, ID to)
- | moveToken(ID object, ID from, ID to)
+ | moveCard(real index, ID from, ID to)
+ | moveToken(real index, ID from, ID to)
  | useToken(ID object)
  | returnToken(ID object)
  | obtainKnowledge(ID name)
- | communicate(ID name, ID attr)
+ | communicate(ID name, Attr attr)
  | changeTurnorder(Turnorder order)
  | calculateScore(list[ID] objects);
  
