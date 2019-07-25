@@ -30,7 +30,7 @@ syntax Decl
  | rules: "rules" "=" "[" {Rule ","}+ "]";  
  
 syntax Card
- = card: ID "=" "[" {Attr ","}+ "]";
+ = card: Attr "=" "[" {Attr ","}+ "]";
 
 syntax Token
  = token: ID "=" "[" VALUE "]" Loc Prop+ "[" {Condition ","}* "]";
@@ -40,7 +40,7 @@ syntax Rule 												// General rules.
  | points: "scoring" "=" "[" {Scoring ","}+ "]"; 				// Points per card.
  
 syntax Stage												// Script of the game. 
- = stage: "stage" ID "=" Condition Playerlist "[" {Turn ","}* "]"
+ = stage: "stage" ID "=" {Condition ","}+ Playerlist "[" {Turn ","}* "]"
  | basic: "stage" ID "=" Playerlist "[" {Turn ","}* "]";
  
 syntax Turnorder
@@ -48,23 +48,26 @@ syntax Turnorder
  
 syntax Turn
  = req: "req" Action
- | opt: "opt" Action;
+ | opt: "opt" Action
+ | choice: VALUE "of" "[" {Action ","}+ "]";
  
 syntax Action												// Specific rules
  = @Category="Action" shuffleDeck: "shuffle" ID 			// DeckID
  | distributeCards: "distribute" VALUE ID "[" {ID ","}+ "]" 	// CardAmount, DeckID , List of Players
  | takeCard: "takeCard" ID ID   						// Deck, deck
  | moveCard: "moveCard" ID ID ID  					// Deck, deck, object
- | moveToken: "moveToken" ID ID ID 							// Object, deck, deck?
- | obtainKnowledge: "getInfo" ID 							// TO DO !!
- | communicate: "TO DO" ID ID 								// Object, quality. Loc / deck ID necessary?
- | changeTurnorder: "changeTurns" Turnorder 				// TO DO: How to skip a player's turn once?
- | calculateScore: "calculateScore"; 						// How to count score? What if there are no teams?
-
+ | moveToken: "moveToken" ID ID ID 					// Object, deck, deck?
+ | useToken: "useToken" ID
+ | returnToken: "returnToken" ID
+ | obtainKnowledge: "getInfo" ID 					// TO DO !!
+ | communicate: "TO DO" ID ID 						// Object, quality. Loc / deck ID necessary?
+ | changeTurnorder: "changeTurns" Turnorder 		// TO DO: How to skip a player's turn once?
+ | calculateScore: "calculateScore" ID+	// How to count score? What if there are no teams?
+ | endGame: "endGame"; 	
+ 					
 /******************************************************************************
  * Main properties of objects.
  ******************************************************************************/
-
 syntax Prop
  = visibility: Vis
  | usability: Usa;
@@ -75,6 +78,7 @@ syntax Vis
  | top: "top"
  | everyone: "everyone"
  | team: "team"
+ | hanabi: "hanabi"
  | hand: "hand";
  
 syntax Usa
@@ -90,7 +94,8 @@ syntax Playerlist
  | turns: "turns";
  
 syntax Scoring
- = s: ID "=" VALUE;
+ = s: ID "=" VALUE
+ | allcards: "each" "=" VALUE;
  
 syntax Loc
  = ID;
@@ -99,8 +104,9 @@ syntax Attr
  = ID | val: VALUE | LIST;
 
 syntax Condition // TO DO!!
- = emptyPile: "if" Exp "then" Action
- | stageCondition: "while" Exp;
+ = deckCondition: "if" Exp "then" Action
+ | stageCondition: "while" Exp
+ | totalTurns: "for" Exp "turns";
  
 syntax Exp
  = var: ID
@@ -112,7 +118,9 @@ syntax Exp
  | lt: Exp l "\<" Exp r
  | le: Exp l "\<=" Exp r
  | neq: Exp l "!=" Exp r
- | eq: Exp l "==" Exp r);
+ | eq: Exp l "==" Exp r
+ | and: Exp l "&&" Exp r
+ | or: Exp l "||" Exp r);
  
 /******************************************************************************
  * Basis.
@@ -153,7 +161,7 @@ lexical Comment
  
 keyword Reserved
  = @category="keyword" Visibility | "deck" | "tokens" | "token" | "team" | "player" | "players" | "game" | "typedef"
- | "distribute" | "move" | "shuffle" | "adjust" | "score" | "true" | "false" | "if" | "then"
+ | "distribute" | "move" | "shuffle" | "adjust" | "score" | "true" | "false" | "if" | "then" | "each"
  |"public" | "private" | "dealer" | "communicate"; // For testing.
 
  

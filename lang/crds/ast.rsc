@@ -70,14 +70,14 @@ data Rule
  | points(list[Scoring] scores);
  
 data Stage 
- = stage(ID name, Condition cdn, Playerlist plist, list[Turn] turns)
+ = stage(ID name, list[Condition] cdns, Playerlist plist, list[Turn] turns)
  | basic(ID name, Playerlist plist, list[Turn] turns);
  
 data Turnorder
  = turnorder(list[ID] names); 
  
 data Turn
- = opt(Action action) | req(Action action);
+ = opt(Action action) | req(Action action) | choice(real r, list[Action] Action);
 
 data Action
  = shuffleDeck(ID name)
@@ -85,10 +85,12 @@ data Action
  | takeCard(ID from, ID to)
  | moveCard(ID object, ID from, ID to)
  | moveToken(ID object, ID from, ID to)
+ | useToken(ID object)
+ | returnToken(ID object)
  | obtainKnowledge(ID name)
  | communicate(ID name, ID attr)
  | changeTurnorder(Turnorder order)
- | calculateScore();
+ | calculateScore(list[ID] objects);
  
 /******************************************************************************
  * Main properties of objects.
@@ -104,7 +106,7 @@ data Loc
  = id(str name); 
  
 data Vis
- = allcards() | none() | top() | everyone() | team() | hand();
+ = allcards() | none() | top() | everyone() | team() | hand() | hanabi();
 
 data Usa
  = draw() | discard() | play() | use() | ret(); 
@@ -113,11 +115,13 @@ data Playerlist
  = allplayers() | dealer() | turns();
 
 data Scoring
- = s(str name, real r);
+ = s(str name, real r)
+ | allcards(real r);
  
 data Condition
- = emptyPile(Exp e, Action action)
- | stageCondition(Exp e);
+ = deckCondition(Exp e, Action action)
+ | stageCondition(Exp e)
+ | totalTurns(Exp e);
  
 data Exp
 = var(ID name)
@@ -128,7 +132,9 @@ data Exp
 | lt(Exp e1, Exp e2)
 | le(Exp e1, Exp e2)
 | eq(Exp e1, Exp e2)
-| neq(Exp e1, Exp e2);
+| neq(Exp e1, Exp e2)
+| and(Exp e1, Exp e2)
+| or(Exp e1, Exp e2);
  
  /******************************************************************************
   * Basis.

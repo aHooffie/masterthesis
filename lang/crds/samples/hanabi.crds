@@ -5,48 +5,87 @@ typedef Colour = [blue, green, red, white, yellow]
 
 deck allCards = 
 [
-	B1 = [blue, 1],
-	B2 = [blue, 2],
-	B3 = [blue, 3],
-	B4 = [blue, 4],
+	B11 = [blue, 1],
+	B12 = [blue, 1],
+	B13 = [blue, 1],
+	B21 = [blue, 2],
+	B22 = [blue, 2],
+	B31 = [blue, 3],
+	B32 = [blue, 3],
+	B41 = [blue, 4],
+	B42 = [blue, 4],
 	B5 = [blue, 5],
-	G1 = [green, 1],
-	G2 = [green, 2],
-	G3 = [green, 3],
-	G4 = [green, 4],
+	G11 = [green, 1],
+	G12 = [green, 1],
+	G13 = [green, 1],
+	G21 = [green, 2],
+	G22 = [green, 2],
+	G31 = [green, 3],
+	G32 = [green, 3],
+	G41 = [green, 4],
+	G42 = [green, 4],
 	G5 = [green, 5],
-	R1 = [red, 1],
-	R2 = [red, 2],
-	R3 = [red, 3],
-	R4 = [red, 4],
+	R11 = [red, 1],
+	R12 = [red, 1],
+	R13 = [red, 1],
+	R21 = [red, 2],
+	R22 = [red, 2],
+	R31 = [red, 3],
+	R32 = [red, 3],
+	R41 = [red, 4],
+	R42 = [red, 4],
 	R5 = [red, 5],
-	W1 = [white, 1],
-	W2 = [white, 2],
-	W3 = [white, 3],
-	W4 = [white, 4],
-	W5 = [white, 5],
-	Y1 = [yellow, 1],
-	Y2 = [yellow, 2],
-	Y3 = [yellow, 3],
-	Y4 = [yellow, 4],
-	Y5 = [yellow, 5]
+	Y11 = [yellow, 1],
+	Y12 = [yellow, 1],
+	Y13 = [yellow, 1],
+	Y21 = [yellow, 2],
+	Y22 = [yellow, 2],
+	Y31 = [yellow, 3],
+	Y32 = [yellow, 3],
+	Y41 = [yellow, 4],
+	Y42 = [yellow, 4],
+	Y5 = [yellow, 5],
+	W11 = [white, 1],
+	W12 = [white, 1],
+	W13 = [white, 1],
+	W21 = [white, 2],
+	W22 = [white, 2],
+	W31 = [white, 3],
+	W32 = [white, 3],
+	W41 = [white, 4],
+	W42 = [white, 4],
+	W5 = [white, 5]
 ] table none []
 
-deck blue = [] table none []
-deck green = [] table none []
-deck red = [] table none []
-deck white = [] table none []
-deck yellow = [] table none []
 
-deck playerA = [] playerA none []
-deck playerB = [] playerB  none []
-deck playerC = [] playerC none []
+deck yellow = [] tableyellow top everyone []
+deck green = [] tablegreen top everyone []
+deck red = [] tablered top everyone []
+deck white = [] tablewhite top everyone []
+deck blue = [] tablblue5 top everyone []
+
+deck handplayerA = [] handplayerA hanabi []
+deck handplayerB = [] handplayerB hanabi []
+deck handplayerC = [] handplayerC hanabi []
 
 team allPlayers = [A, B, C]
 
-players = 
-[	
-	A = [],
-	B = [],
-	C = []
+tokens = [
+	lives = [3] tablelives all use return [],
+	hints = [8] tablehints all use return []
+]
+
+players = [A, B, C]
+
+
+rules = [ 
+	scoring = [ each = 1 ]
+]
+
+gameflow = [ 
+	turnorder = [A, B, C]
+	stage dealing = dealer [req shuffle allCards, req distribute 5 allCards [A, B, C]],
+	stage midgame = while allCards.size != 0, while lives != 0 turns [1 of [ shuffle allCards ]],
+	stage endgame = for 1 turns turns [1 of [shuffle allCards]],
+	stage calculateScore = dealer [req calculateScore allPlayers yellow green red white blue]
 ]
