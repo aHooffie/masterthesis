@@ -1,258 +1,125 @@
 module lang::crds::basicanalysis
 
 import lang::crds::ast;
+
+import lang::crds::grammar;
 import util::NameGraph;
 
-import IO;
+
+import Prelude;
 import List;
+import ParseTree;
+import String;
+import Type;
 
 loc NULL_LOC = |null://null|(0,0,<0,0>,<0,0>);
 
 data Scope
-  = scope(str name, loc l,
-          map[str scopeName, Scope s] scopes,
-          map[str defName, loc l] defs);
-          
-// CRDSII          
-public CRDSII setScope(CRDSII c: game(ID name, list[Decl] decls))
- = game(name, [setScope(scope(c), decl, [ID.name]) | d <- decls])[@location = c.id@location][@scope = []];
- 
-// DECLS (7x) 
-public Decl setScope(Scope s, Decl d: typedef(ID name, list[Attr] values), list[str] scope)
- = ;
+  = scope(str scopeName, loc l, map[str defName, loc l] defs, map[str defName, str nodeType] types);
 
-public Decl setScope(Scope s, Decl d: deck(ID name, list[Card] cards, Loc location, list[Prop] props, list[Condition] cdns), list[str] scope)
- = ;
+public Scope globalLUT = scope("global", NULL_LOC, (), ());
+public list[ tuple[str def, list[loc l] uses]] refs = [];
 
-public Decl setScope(Scope s, Decl d: team(ID name, list[ID] names), list[str] scope)
- = ;
-
-public Decl setScope(Scope s, Decl d: gameflow(Turnorder order, list[Stage] stages), list[str] scope)
- = ;
-
-public Decl setScope(Scope s, Decl d: players(list[ID] names), list[str] scope)
- = ;
-
-public Decl setScope(Scope s, Decl d: tokens(list[Token] tokens), list[str] scope)
- = ;
- 
-public Decl setScope(Scope s, Decl d: rules(list[Rule] rules), list[str] scope)
- = ;
- 
- 
-// CARD 
-
-public Card setScope(Scope s, Card c: card(ID name, list[Attr] values), list[str] scope)
- = ;
-
-// TOKEN
-public Token setScope(Scope s, Token t: token(ID name, real r, Loc location, list[Prop] props, list[Condition] cdns), list[str] scope)
-= ;
-
-// RULE (2x) 
-public Rule setScope(Scope s, Rule r: playerCount(real min, real max), list[str] scope)
-= ;
-public Rule setScope(Scope s, Rule r: points(list[Scoring] scores), list[str] scope)
- = ;
-
-// STAGE (2x)
-public Stage setScope(Scope s, Stage st: stage(ID name, list[Condition] cdns, Playerlist plist, list[Turn] turns), list[str] scope)
-= ;
-public Stage setScope(Scope s, Stage st: basic(ID name, Playerlist plist, list[Turn] turns), list[str] scope)
-= ;
-
-
-// TURNORDER 
-public Turnorder setScope(Scope s, Turnorder t: turnorder(list[ID] names), list[str] scope) 
-= ;
-
-// TURN (3x)
-public Turn setScope(Scope s, Turn t: opt(Action action), list[str] scope) 
- = ;
-public Turn setScope(Scope s, Turn t: req(Action action), list[str] scope) 
- = ;
-public Turn setScope(Scope s, Turn t: choice(real r, list[Action] Actions), list[str] scope)
- = ;
-
-// ACTION (11x)
-
-// PROP (2x)
-public Prop setScope(Scope s, Prop p: visibility(Vis vis), list[str] scope) 
- = ;
-public Prop setScope(Scope s, Prop p: usability(Usa usa), list[str] scope) 
- = ;
-
-
-// ATTR (3x) 
-public Attr setScope(Scope s, Attr a: id(Str name), list[str] scope) 
- = ;
- public Attr setScope(Scope s, Attr a: val(real r), list[str] scope) 
- = ;
- public Attr setScope(Scope s, Attr a: l(real min, real max), list[str] scope) 
- = ;
-
-
-// LOC (1x)
-public Loc setScope(Scope s, Loc l: id(Str name), list[str] scope) 
- = ;
-
-// SCORING (2x)
-public Exp setScope(Scope s, Scoring sc: s(str name, real r), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Scoring sc: allcards(real r), list[str] scope) 
-= ;
-
-// CONDITION (3x)
-public Condition setScope(Scope s, Condition c: deckCondition(Exp e, Action action), list[str] scope) 
-= ;
-
-public Condition setScope(Scope s, Condition c: stageCondition(Exp e), list[str] scope) 
-= ;
-
-public Condition setScope(Scope s, Condition c: totalTurns(Exp e), list[str] scope) 
-= ;
-
-
-// EXP (11x) 
-public Exp setScope(Scope s, Exp e: var(ID name), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: val(real r), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: obj(ID name, ID attr), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: gt(Exp e1, Exp e2), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: ge(Exp e1, Exp e2), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: lt(Exp e1, Exp e2), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: le(Exp e1, Exp e2), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: eq(Exp e1, Exp e2), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: neq(Exp e1, Exp e2), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: and(Exp e1, Exp e2), list[str] scope) 
-= ;
-
-public Exp setScope(Scope s, Exp e: or(Exp e1, Exp e2), list[str] scope) 
-= ;
-
-// LIST
-public List setScope(Scope s, List l: l(real min, real max), list[str] scope) 
- = ;
-
-// ID
-public ID setScope(Scope s, ID i: id(str name), list[str] scope) 
- = ;
-
-// BOOL (2x)
-// Hoeft niet? 
-
-// VIS (7x)
-// HOEFT NIET?? 
-
-
-// USA (5x)
-// HOEFT NIET?? 
-
-// PLAYERLIST (3x)
-// HOEFT NIET??
-
-
-
-// st = symbol table. scope = to search in. findNames = to find.
-public loc findLoc(Scope st, list[str] currentScope, list[str] findNames)
-{
-	Scope s = st;
-	for (str scopeName <- currentScope) {
-		s = s.scopes[scopeName];
-	}
-  
-  	print("SEARCHING in SCOPE "+s.findNames+" for: ");
-  	
-  	for(name <- findNames){
-  		print(name+".");
-  	}
-  	println("");
-  
-  
-  	// What does this dooo?
-	Scope find = s;
-	list[str] tail = findNames;
-	str n;
-  	do
-	{
-		<n,tail>= headTail(tail);
-	    println("Search " +n);  
-	    
-	    // If n is in the current scope.
-	    if (n in find.scopes) { 				//nested search	      
-	    	if (tail != []) {
-	        	find = find.scopes[n];
-	     	} else {
-	        	println("Found Scope "+n);
-	       		return find.scopes[n].l;
-	       	}
-	    } else if (n in find.defs) { 			//found state
-	    	println("Found state "+n);
-	    	return find.defs[n];
-	    } else {  								// failed to find scope or state, go up a level
-			if (currentScope != []) {
-	        	println("Failed to find " + n);      
-	       		list[str] currentSReversed = reverse(currentScope); 	// Reverse list order.
-		        <_, temp> = pop(currentSReversed);
-		        list[str] finalReverse = reverse(temp);	 				// Reverse list order.       
-	        	return findLoc(st, finalReverse, findNames);
-	      	} else {
-	        	break;
-	      	}
-	    }    
-	  }	while(tail != []);
-	  
-	  println("DONE.");  
-	  return NULL_LOC;
+void leuk(loc f) {
+	Tree parsedFile = parse(#CRDS, f);			
+	CRDSII implodedFile = implode(#CRDSII, parsedFile);
+	
+	addIDstoLUT(implodedFile);
+	checkIDstoLUT(implodedFile);
+	addRefs(implodedFile);
+	//println(globalLUT);
 }
 
-
-// 
-public NameGraph getNameGraph(CRDSII c)
+public void addIDstoLUT(CRDSII c)
 {
-	set[loc] defs = {};
-	set[loc] uses = {};
-	rel[loc, loc] refs = {};
-  
 	visit(c) {
-		case Action a:  	{ defs += {a@location}; }
-		case Attr a:  		{ defs += {a@location}; }
-		case Card c:		{ defs += {c@location}; }
-		case Condition c:  	{ defs += {c@location}; }
-		case CRDSII c:		{ defs += {c@location}; }
-		case Decl d:		{ defs += {d@location}; }
-		case Exp e:  		{ defs += {e@location}; }
-		case Loc l:  		{ defs += {l@location}; }
-		case Playerlist p:  { defs += {p@location}; }
-		case Prop p:  		{ defs += {p@location}; }	
-		case Rule r:  		{ defs += {r@location}; }
-		case Scoring s:  	{ defs += {s@location}; }
-		case Stage s: 		{ defs += {s@location}; }
-		case Token t: 		{ defs += {t@location}; }
-		case Turn t:  		{ defs += {t@location}; }
-		case Turnorder t: 	{ defs += {t@location}; }
-		case Usa u:  		{ defs += {u@location}; }
-		case Vis v:  		{ defs += {v@location}; }
+		case card(ID name, _): 							{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "card"); refs += <name.name, [name@location]>; }
+		case team(ID name, _):							{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "team"); refs += <name.name, [name@location]>; }
+		case players(list[Hands] hands):				{ addPlayers(hands); }
+		case deck(ID name, _, _, _):					{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "deck"); refs += <name.name, [name@location]>; }
+		case game(ID name, list[Decl] decls):			{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "game"); refs += <name.name, [name@location]>;}
+		case typedef(ID name, list[Attr] values):		{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "typedef"); foo(values); refs += <name.name, [name@location]>;}
+		case stage(ID name, _, _, _): 					{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "stage"); refs += <name.name, [name@location]>;}	
+		case basic(ID name, _, _):						{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "stage"); refs += <name.name, [name@location]>;}
+		case token(ID name, _, _, _): 					{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "token"); refs += <name.name, [name@location]>;}
 	}
-  
-  	return <defs,uses,refs>;
+		
+  	return;
 }
- 
+
+
+public Scope addPlayers(list[Hands] hands) {
+	for (hand <- hands) {
+	
+		if (hand.player in globalLUT.defs) {
+			println("Player <hand.player>  is already defined. Please use unique identifiers.");
+			return NULL;
+		} else
+			globalLUT.defs += (hand.player : hand@location);
+			globalLUT.types += (hand.player : "player");
+		}
+	
+	return globalLUT;
+}
+
+// TO DO: Values of typedef attrs.
+public void foo(list[Attr] values) {
+	//for (v <- values) {
+		//println(v);
+	//}
+	
+	return;
+}
+
+
+public void checkIDstoLUT(CRDSII c)
+{
+	println("Checking IDs");
+	
+	visit(c) {
+		case id(str name): { if (name notin globalLUT.defs) println("ERROR: Could not find: <name>");}
+	}
+	
+	println("Finished");
+		
+  	return;
+}
+
+public void addRefs(CRDSII c)
+{
+	visit(c) {
+		case team(_, list[ID]names): 								{ addIDs(names); }
+		case turnorder(list[ID]names): 								{ addIDs(names); }
+		case shuffleDeck(ID name): 									{ addIDs(name); }
+		case distributeCards(_, ID name, list[ID] players): 		{ addIDs(name); addIDs(players); }
+		case moveCard(_, list[ID] from, list[ID] to):				{ addIDs(from); addIDs(to); }
+ 		case moveToken(_, ID from, ID to):						 	{ addIDs(from); addIDs(to); }
+		case useToken(ID object):									{ addIDs(object); }
+		case returnToken(ID object):								{ addIDs(object); }
+		case obtainKnowledge(ID name):								{ addIDs(object); }
+		case communicate(list[ID] locations, Attr attr):			{ addIDs(locations); } 
+		case calculateScore(list[ID] objects):						{ addIDs(objects); }
+//		case Loc (hands, attr)
+//		case scoring
+// 		case Exp
+	}
+	
+	return;
+}
+
+
+public void addIDs (list[ID] names) {
+	for (name <- names) {
+		println(name);
+		println(name@location);
+	}
+	return;
+}
+
+public void addIDs (ID name) {
+	println(name);
+	println(name@location);
+	
+	return;
+}
+

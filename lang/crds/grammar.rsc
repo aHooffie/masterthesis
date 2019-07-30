@@ -22,10 +22,10 @@ start syntax CRDS
 syntax Decl
  = @Category="Decl"
    typedef: "typedef" ID "=" "[" {Attr ","}+ "]" 			// E.g. names, values, colours.
- | deck: "deck" ID "=" "[" {Card ","}* "]" Loc Prop+ "[" {Condition ","}* "]"
+ | deck: "deck" ID "=" "[" {Card ","}* "]" Loc Prop+ // "[" {Condition ","}* "]"
  | team: "team" ID "=" "[" {ID ","}+ "]" 					// No teams defined == FFA.
  | gameflow: "gameflow" "=" "[" Turnorder {Stage ","}+ "]"
- | players: "players" "=" "[" {ID ","}+ "]"
+ | players: "players" "=" "[" {Hands ","}+ "]"
  | tokens: "tokens" "=" "[" {Token ","}+ "]" 				// Set of all possible tokens.
  | rules: "rules" "=" "[" {Rule ","}+ "]";  
  
@@ -33,7 +33,7 @@ syntax Card
  = card: Attr "=" "[" {Attr ","}+ "]";
 
 syntax Token
- = token: ID "=" "[" VALUE "]" Loc Prop+ "[" {Condition ","}* "]";
+ = token: ID "=" "[" VALUE "]" Loc Prop+; // "[" {Condition ","}* "]";
  
 syntax Rule 												// General rules.
  = playerCount: "players" "=" VALUE "to" VALUE
@@ -53,17 +53,18 @@ syntax Turn
  
 syntax Action																// Specific rules
  = @Category="Action" shuffleDeck: "shuffle" ID 							// DeckID
- | distributeCards: "distribute" VALUE ID "[" {ID ","}+ "]" 				// CardAmount, DeckID , List of Players
+ | distributeCards: "distribute" VALUE "from" ID "to" "[" {ID ","}+ "]" 				// CardAmount, DeckID , List of Players
  | takeCard: "takeCard" ID ID
- | moveCard: "moveCard" VALUE ID ID
- | moveToken: "moveToken" VALUE ID ID
+ | moveCard: "moveCard" Attr "from" "[" {ID ","}+ "]" "to" "[" {ID ","}+ "]"
+ | moveToken: "moveToken" VALUE "from" ID "to" ID
  | useToken: "useToken" ID
  | returnToken: "returnToken" ID
  | obtainKnowledge: "getInfo" ID
- | communicate: "giveHint" ID Attr
+ | communicate: "giveHint" "[" {ID ","}* "]" Attr
  | changeTurnorder: "changeTurns" Turnorder
  | calculateScore: "calculateScore" ID+
- | endGame: "endGame"; 	
+ | endGame: "endGame"
+ > left sequence: Action "and then" Action; 	
  					
 /******************************************************************************
  * Main properties of objects.
@@ -96,6 +97,9 @@ syntax Playerlist
 syntax Scoring
  = s: ID "=" VALUE
  | allcards: "each" "=" VALUE;
+
+syntax Hands 
+ = hands: ID "has" ID; 
  
 syntax Loc
  = ID;
@@ -112,6 +116,7 @@ syntax Exp
  = var: ID
  | val: VALUE
  | obj: ID"."ID
+ | empty: "empty"
  > left (
    gt: Exp l "\>" Exp r
  | ge: Exp l "\>=" Exp r
@@ -129,7 +134,7 @@ syntax ID
  = id: NAME;
 
 syntax LIST 											// TO DO
- = l: VALUE ".." VALUE;
+ = l: "[" VALUE ".." VALUE "]";
 
 syntax BOOL
  = @category="String" tru: "true" | fal: "false"; 		// TO DO
@@ -162,7 +167,7 @@ lexical Comment
 keyword Reserved
  = @category="keyword" Visibility | "deck" | "tokens" | "token" | "team" | "player" | "players" | "game" | "typedef"
  | "distribute" | "move" | "shuffle" | "adjust" | "score" | "true" | "false" | "if" | "then" | "each"
- |"public" | "private" | "dealer" | "communicate"; // For testing.
+ |"public" | "private" | "dealer" | "communicate" | "and" | "has" | "empty"; // For testing.
 
  
 public start[CRDS] crds_parse(str src, loc file)

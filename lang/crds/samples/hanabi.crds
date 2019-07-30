@@ -2,6 +2,7 @@ game Hanabi
 
 typedef Value = [1, 2, 3, 4, 5]
 typedef Colour = [blue, green, red, white, yellow]
+typedef Location = [bluepile, greenpile, redpile, whitepile, yellowpile, discardpile, drawpile, handA, handB, handC]
 
 deck allCards = 
 [
@@ -14,7 +15,7 @@ deck allCards =
 	B32 = [blue, 3],
 	B41 = [blue, 4],
 	B42 = [blue, 4],
-	B5 = [blue, 5],
+	B5 =  [blue, 5],
 	G11 = [green, 1],
 	G12 = [green, 1],
 	G13 = [green, 1],
@@ -24,7 +25,7 @@ deck allCards =
 	G32 = [green, 3],
 	G41 = [green, 4],
 	G42 = [green, 4],
-	G5 = [green, 5],
+	G5 =  [green, 5],
 	R11 = [red, 1],
 	R12 = [red, 1],
 	R13 = [red, 1],
@@ -34,7 +35,7 @@ deck allCards =
 	R32 = [red, 3],
 	R41 = [red, 4],
 	R42 = [red, 4],
-	R5 = [red, 5],
+	R5 =  [red, 5],
 	Y11 = [yellow, 1],
 	Y12 = [yellow, 1],
 	Y13 = [yellow, 1],
@@ -44,7 +45,7 @@ deck allCards =
 	Y32 = [yellow, 3],
 	Y41 = [yellow, 4],
 	Y42 = [yellow, 4],
-	Y5 = [yellow, 5],
+	Y5 =  [yellow, 5],
 	W11 = [white, 1],
 	W12 = [white, 1],
 	W13 = [white, 1],
@@ -54,126 +55,48 @@ deck allCards =
 	W32 = [white, 3],
 	W41 = [white, 4],
 	W42 = [white, 4],
-	W5 = [white, 5]
-] table none []
+	W5 =  [white, 5]
+] drawpile none
 
-
-deck yellow = [] tableyellow top everyone []
-deck green = [] tablegreen top everyone []
-deck red = [] tablered top everyone []
-deck white = [] tablewhite top everyone []
-deck blue = [] tableblue5 top everyone []
-deck discardPile = [] tableDiscard all everyone []
-
-deck handplayerA = [] handplayerA hanabi [if handplayerA.size < 5 then takeCard table handplayerA]
-deck handplayerB = [] handplayerB hanabi [if handplayerB.size < 5 then takeCard table handplayerB]
-deck handplayerC = [] handplayerC hanabi [if handplayerC.size < 5 then takeCard table handplayerC]
+deck yellow = 	[] yellowpile 	top everyone
+deck green = 	[] greenpile 	top everyone 	
+deck red = 		[] redpile 		top everyone 	
+deck white = 	[] whitepile 	top everyone 	
+deck blue = 	[] bluepile 	top everyone 	
+deck discardPile = [] discardpile all everyone 	
+deck handA = [] handA all hanabi 
+deck handB = [] handB all hanabi 
+deck handC = [] handC all hanabi 
 
 team allPlayers = [A, B, C]
 
 tokens = [
-	lives = [3] tablelives all use return [],
-	hints = [8] tablehints all use return []
+	lives = [3] tablelives all use return,
+	hints = [8] tablehints all use return
 ]
 
-players = [A, B, C]
+players = [A has handA, B has handB, C has handC]
 
 
 rules = [ 
 	scoring = [ each = 1 ]
 ]
 
-gameflow = [ 
-
-
-	// WHAT ABOUT DEALER ACTIONS (TOKENS / CARDS DISTRIBUTION - PUT IN PROGRAMMING OR HERE? ) 
-	// WHAT ABOUT CARD INDEX NUMBER, SOMEHOW LESS HARDCODED? 
-	
+gameflow = [	
 	turnorder = [A, B, C]
-	stage dealing = dealer [req shuffle allCards, req distribute 5 allCards [A, B, C]],
-	stage midgame = while allCards.size != 0, while lives != 0 turns 
-		[1 of [  giveHint handplayerA Value, giveHint handplayerA Colour,
-				 giveHint handplayerB Value, giveHint handplayerB Colour,
-				 giveHint handplayerC Value, giveHint handplayerC Colour,
-				 
-				 moveCard 1 handplayerA discardPile, moveCard 1 handplayerB discardPile, moveCard 1 handplayerC discardPile,
-				 moveCard 2 handplayerA discardPile, moveCard 2 handplayerB discardPile, moveCard 2 handplayerC discardPile,
-				 moveCard 3 handplayerA discardPile, moveCard 3 handplayerB discardPile, moveCard 3 handplayerC discardPile,
-				 moveCard 4 handplayerA discardPile, moveCard 4 handplayerB discardPile, moveCard 4 handplayerC discardPile,
-				 moveCard 5 handplayerA discardPile, moveCard 5 handplayerB discardPile, moveCard 5 handplayerC discardPile,
-				 
-				 moveCard 1 handplayerA blue, moveCard 1 handplayerB blue, moveCard 1 handplayerC blue,
-				 moveCard 2 handplayerA blue, moveCard 2 handplayerB blue, moveCard 2 handplayerC blue,
-				 moveCard 3 handplayerA blue, moveCard 3 handplayerB blue, moveCard 3 handplayerC blue,
-				 moveCard 4 handplayerA blue, moveCard 4 handplayerB blue, moveCard 4 handplayerC blue,
-				 moveCard 5 handplayerA blue, moveCard 5 handplayerB blue, moveCard 5 handplayerC blue,
-				 
-				 moveCard 1 handplayerA yellow, moveCard 1 handplayerB yellow, moveCard 1 handplayerC yellow,
-				 moveCard 2 handplayerA yellow, moveCard 2 handplayerB yellow, moveCard 2 handplayerC yellow,
-				 moveCard 3 handplayerA yellow, moveCard 3 handplayerB yellow, moveCard 3 handplayerC yellow,
-				 moveCard 4 handplayerA yellow, moveCard 4 handplayerB yellow, moveCard 4 handplayerC yellow,
-				 moveCard 5 handplayerA yellow, moveCard 5 handplayerB yellow, moveCard 5 handplayerC yellow,
-				 
- 				 moveCard 1 handplayerA white, moveCard 1 handplayerB white, moveCard 1 handplayerC white,
-				 moveCard 2 handplayerA white, moveCard 2 handplayerB white, moveCard 2 handplayerC white,
-				 moveCard 3 handplayerA white, moveCard 3 handplayerB white, moveCard 3 handplayerC white,
-				 moveCard 4 handplayerA white, moveCard 4 handplayerB white, moveCard 4 handplayerC white,
-				 moveCard 5 handplayerA white, moveCard 5 handplayerB white, moveCard 5 handplayerC white,
-				 
-				 moveCard 1 handplayerA green, moveCard 1 handplayerB green, moveCard 1 handplayerC green,
-				 moveCard 2 handplayerA green, moveCard 2 handplayerB green, moveCard 2 handplayerC green,
-				 moveCard 3 handplayerA green, moveCard 3 handplayerB green, moveCard 3 handplayerC green,
-				 moveCard 4 handplayerA green, moveCard 4 handplayerB green, moveCard 4 handplayerC green,
-				 moveCard 5 handplayerA green, moveCard 5 handplayerB green, moveCard 5 handplayerC green,
-				 
- 				 moveCard 1 handplayerA red, moveCard 1 handplayerB red, moveCard 1 handplayerC red,
-				 moveCard 2 handplayerA red, moveCard 2 handplayerB red, moveCard 2 handplayerC red,
-				 moveCard 3 handplayerA red, moveCard 3 handplayerB red, moveCard 3 handplayerC red,
-				 moveCard 4 handplayerA red, moveCard 4 handplayerB red, moveCard 4 handplayerC red,
-				 moveCard 5 handplayerA red, moveCard 5 handplayerB red, moveCard 5 handplayerC red
-				 ]],
-	
-	stage endgame = for 1 turns turns 
-		[1 of [  giveHint handplayerA Value, giveHint handplayerA Colour,
-				 giveHint handplayerB Value, giveHint handplayerB Colour,
-				 giveHint handplayerC Value, giveHint handplayerC Colour,
-				 
-				 moveCard 1 handplayerA discardPile, moveCard 1 handplayerB discardPile, moveCard 1 handplayerC discardPile,
-				 moveCard 2 handplayerA discardPile, moveCard 2 handplayerB discardPile, moveCard 2 handplayerC discardPile,
-				 moveCard 3 handplayerA discardPile, moveCard 3 handplayerB discardPile, moveCard 3 handplayerC discardPile,
-				 moveCard 4 handplayerA discardPile, moveCard 4 handplayerB discardPile, moveCard 4 handplayerC discardPile,
-				 moveCard 5 handplayerA discardPile, moveCard 5 handplayerB discardPile, moveCard 5 handplayerC discardPile,
-				 
-				 moveCard 1 handplayerA blue, moveCard 1 handplayerB blue, moveCard 1 handplayerC blue,
-				 moveCard 2 handplayerA blue, moveCard 2 handplayerB blue, moveCard 2 handplayerC blue,
-				 moveCard 3 handplayerA blue, moveCard 3 handplayerB blue, moveCard 3 handplayerC blue,
-				 moveCard 4 handplayerA blue, moveCard 4 handplayerB blue, moveCard 4 handplayerC blue,
-				 moveCard 5 handplayerA blue, moveCard 5 handplayerB blue, moveCard 5 handplayerC blue,
-				 
-				 moveCard 1 handplayerA yellow, moveCard 1 handplayerB yellow, moveCard 1 handplayerC yellow,
-				 moveCard 2 handplayerA yellow, moveCard 2 handplayerB yellow, moveCard 2 handplayerC yellow,
-				 moveCard 3 handplayerA yellow, moveCard 3 handplayerB yellow, moveCard 3 handplayerC yellow,
-				 moveCard 4 handplayerA yellow, moveCard 4 handplayerB yellow, moveCard 4 handplayerC yellow,
-				 moveCard 5 handplayerA yellow, moveCard 5 handplayerB yellow, moveCard 5 handplayerC yellow,
-				 
- 				 moveCard 1 handplayerA white, moveCard 1 handplayerB white, moveCard 1 handplayerC white,
-				 moveCard 2 handplayerA white, moveCard 2 handplayerB white, moveCard 2 handplayerC white,
-				 moveCard 3 handplayerA white, moveCard 3 handplayerB white, moveCard 3 handplayerC white,
-				 moveCard 4 handplayerA white, moveCard 4 handplayerB white, moveCard 4 handplayerC white,
-				 moveCard 5 handplayerA white, moveCard 5 handplayerB white, moveCard 5 handplayerC white,
-				 
-				 moveCard 1 handplayerA green, moveCard 1 handplayerB green, moveCard 1 handplayerC green,
-				 moveCard 2 handplayerA green, moveCard 2 handplayerB green, moveCard 2 handplayerC green,
-				 moveCard 3 handplayerA green, moveCard 3 handplayerB green, moveCard 3 handplayerC green,
-				 moveCard 4 handplayerA green, moveCard 4 handplayerB green, moveCard 4 handplayerC green,
-				 moveCard 5 handplayerA green, moveCard 5 handplayerB green, moveCard 5 handplayerC green,
-				 
- 				 moveCard 1 handplayerA red, moveCard 1 handplayerB red, moveCard 1 handplayerC red,
-				 moveCard 2 handplayerA red, moveCard 2 handplayerB red, moveCard 2 handplayerC red,
-				 moveCard 3 handplayerA red, moveCard 3 handplayerB red, moveCard 3 handplayerC red,
-				 moveCard 4 handplayerA red, moveCard 4 handplayerB red, moveCard 4 handplayerC red,
-				 moveCard 5 handplayerA red, moveCard 5 handplayerB red, moveCard 5 handplayerC red
-				 ]],
-	
+	stage dealing = dealer [req shuffle allCards, req distribute 5 from allCards to [A, B, C]],
+	stage midgame = while allCards != empty, while lives != 0 turns
+		[1 of [ giveHint [handA, handB, handC] Value and then useToken hints,
+				giveHint [handA, handB, handC] Colour and then useToken hints,
+				moveCard [1 .. 5] from [handA, handB, handC] to [bluepile, yellowpile, whitepile, greenpile, redpile]
+				and then moveCard 1 from [drawpile] to [handA, handB, handC]
+			]],
+		
+	stage endgame = while lives != 0, for 1 turns turns 
+		[1 of [ giveHint [handA, handB, handC] Value and then useToken hints,
+				giveHint [handA, handB, handC] Colour and then useToken hints,
+				moveCard [1 .. 5] from [handA, handB, handC] to [bluepile, yellowpile, whitepile, greenpile, redpile]
+			]
+		],	
 	stage calculateScore = dealer [req calculateScore allPlayers yellow green red white blue]
 ]

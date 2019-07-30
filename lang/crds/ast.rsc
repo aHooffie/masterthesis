@@ -29,6 +29,7 @@ anno loc Card@location;
 anno loc Condition@location;
 anno loc Exp@location;
 anno loc ID@location;
+anno loc Hands@location;
 anno loc Loc@location;
 anno loc Playerlist@location;
 anno loc Rule@location;
@@ -52,10 +53,10 @@ data CRDSII
 
 data Decl
  = typedef	(ID name, list[Attr] values) 
- | deck		(ID name, list[Card] cards, Loc location, list[Prop] props, list[Condition] cdns)
+ | deck		(ID name, list[Card] cards, Loc location, list[Prop] props)//, list[Condition] cdns)
  | team		(ID name, list[ID] names)
  | gameflow (Turnorder order, list[Stage] stages)
- | players	(list[ID] names)
+ | players	(list[Hands] hands)
  | tokens	(list[Token] tokens)
  | rules	(list[Rule] rules);
 
@@ -63,7 +64,7 @@ data Card
  = card(ID name, list[Attr] attrs);
 
 data Token 
- = token(ID name, real r, Loc location, list[Prop] props, list[Condition] cdns); 
+ = token(ID name, real r, Loc location, list[Prop] props);//, list[Condition] cdns); 
  
 data Rule 
  = playerCount(int min, int max)
@@ -82,15 +83,16 @@ data Turn
 data Action
  = shuffleDeck(ID name)
  | distributeCards(real r, ID name, list[ID] players)
- | takeCard(ID from, ID to)
- | moveCard(real index, ID from, ID to)
- | moveToken(real index, ID from, ID to)
+ | takeCard(ID f, ID t)
+ | moveCard(Attr attr, list[ID] from, list[ID] to)
+ | moveToken(real index, ID f, ID t)
  | useToken(ID object)
  | returnToken(ID object)
- | obtainKnowledge(ID name)
- | communicate(ID name, Attr attr)
+ | obtainKnowledge(ID name) 		// TO FIX. 
+ | communicate(list[ID] locations, Attr attr)
  | changeTurnorder(Turnorder order)
- | calculateScore(list[ID] objects);
+ | calculateScore(list[ID] objects)
+ | sequence(Action first, Action then);
  
 /******************************************************************************
  * Main properties of objects.
@@ -104,6 +106,9 @@ data Attr
  
 data Loc
  = id(str name); 
+ 
+data Hands 
+ = hands(str player, str location);
  
 data Vis
  = allcards() | none() | top() | everyone() | team() | hand() | hanabi();
@@ -127,6 +132,7 @@ data Exp
 = var(ID name)
 | val(real r)
 | obj(ID name, ID attr)
+| empty()
 | gt(Exp e1, Exp e2)
 | ge(Exp e1, Exp e2)
 | lt(Exp e1, Exp e2)
