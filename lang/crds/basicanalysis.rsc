@@ -57,11 +57,11 @@ void main(loc f) {
 	checkTypes(implodedFile, lut);
 	if (errorsFound != 0) { println("Errors found. Please adjust your game description accordingly."); return; }
 	
-	
 	iprintln("Adding references to LUT");
 	// Add all uses to the right references..	
 	lut = addRefs(implodedFile, lut);
-	iprintToFile(|project://DSL/src/lang/crds/samples/refs|, lut.refs);
+	
+	iprintToFile(|project://DSL/src/lang/crds/samples/refs|, lut.refs); // Check if this is correct !! 
 	if (errorsFound != 0) { println("Errors found. Please adjust your game description accordingly."); return; }
 }
 
@@ -85,7 +85,7 @@ public Scope addDefs(CRDSII c, Scope lut)
   	return lut;
 }
 
-// Add current definition.
+// Add constructor definition to LUT.
 public Scope addDef(str name, loc l, str nodetype, Scope lut) {
 	if (name in lut.defs) {
 		println("Cannot define <name> as <nodetype>. Please use unique identifiers.");
@@ -99,8 +99,8 @@ public Scope addDef(str name, loc l, str nodetype, Scope lut) {
 	}
 }
 
+// Special case: Attributes (in Card, Token & Typedef)
 public Scope addAttrs(ID name, list[Exp] exps, Scope lut) {
-	
 	for (exp <- exps) {
 		if (var(id(str a)) := exp) { lut = addDef(a, exp@location, name.name, lut); }
 		else if (val(real r) := exp) { lut = addDef(toString(r), exp@location, name.name, lut); }
@@ -109,13 +109,20 @@ public Scope addAttrs(ID name, list[Exp] exps, Scope lut) {
 	return lut;
 }
 
+// Loop over tree to add the references to defined variables.
 public Scope addRefs(CRDSII c, Scope lut)
-{
-	println("Adding refs");
-	
+{	
 	visit(c) {
-		case team(_, list[ID]names): 								{ for (use <- names) { lut = addRef(use, lut); } }
-		case turnorder(list[ID]names): 								{ for (use <- names) { lut = addRef(use, lut); } }
+		case deck(_, _, ID location, _):							{ lut = addRef(location, lut); }
+		case team(_, list[ID] names): 								{ for (use <- names) { lut = addRef(use, lut); } }
+		case turnorder(list[ID] names): 							{ for (use <- names) { lut = addRef(use, lut); } }
+		case card(_, list[Exp] exps):								{ lut = addAttrRefs(exps, lut); }
+		case token(_, _, ID location, _):							{ lut = addRef(location, lut); }
+		case points(list[Scoring] scores):							{ lut = addScores(scores, lut); }
+		case var(ID name):											{ lut = addRef(name, lut); }
+		case obj(ID name, ID attr):									{ lut = addRef(name, lut); lut = addRef(attr, lut); }
+		case hands(_, ID location):								{ lut = addRef(location, lut); }
+		
 		case shuffleDeck(ID name): 									{ lut = addRef(name, lut); }
 		case distributeCards(_, ID name, list[ID] players): 		{ lut = addRef(name, lut); for (use <- players) { lut = addRef(use, lut); } }
 		case moveCard(_, list[ID] from, list[ID] to):				{ for (use <- from) { lut = addRef(use, lut); }  for (use <- to) { lut = addRef(use, lut); } }
@@ -125,22 +132,47 @@ public Scope addRefs(CRDSII c, Scope lut)
 		case obtainKnowledge(ID name):								{ lut = addRef(name, lut); }
 		case communicate(list[ID] locations, Exp e):				{ for (use <- locations) { lut = addRef(use, lut); } } // TODO: Exp e
 		case calculateScore(list[ID] objects):						{ for (use <- objects) { lut = addRef(use, lut); } }
-		case Loc(ID name):											{ lut = addRef(name, lut); }
-		//case scoring(
-		//case Exp
-		//case Card(_, attr):
-		case deck(_, _, ID location, _):							{ lut = addRef(location, lut); }
-		//case hands():
+		
 	}
 	
 	return lut;
 }
 
+// Add constructor referral to LUT.
 public Scope addRef(ID use, Scope lut) {
 	try {
 		lut.refs[use.name] += use@location;	
 	} catch NoSuchKey(): errorsFound += 1;
 
+	return lut;
+}
+
+// Special case: Attributes (in Card, Token & Typedef)
+public Scope addAttrRefs(list[Exp] exps, Scope lut) {
+	for (exp <- exps) {
+		if (var(id(str a)) := exp) {
+			try {
+				lut.refs[a] += exp@location;	
+			} catch NoSuchKey(): errorsFound += 1;
+		} else if (val(real r) := exp) {
+			try {
+				lut.refs[toString(r)] += exp@location;	
+			} catch NoSuchKey(): errorsFound += 1;
+		}
+	}
+
+	return lut;	
+}
+
+// Special case: Scores
+public Scope addScores(list[Scoring] scores, Scope lut) {
+	for (score <- scores) {
+		try {
+			if (s(str name, real r) := score) 
+				lut.refs[name] += score@location;	
+		} catch NoSuchKey(): errorsFound += 1;
+
+		}
 	return lut;
 }
 
@@ -203,4 +235,4 @@ public void compareTypes(str s, str t) {
 	}
 	
 	return;
-}
+	}
