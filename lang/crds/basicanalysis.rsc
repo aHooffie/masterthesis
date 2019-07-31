@@ -1,10 +1,19 @@
+/******************************************************************************
+ * cardscript's abstract syntax 			
+ *
+ * File 	      	basicanalysis.rsc
+ * Package			lang::crds
+ * Brief       		Checks variable definitions and uses on correct usage.
+ * Contributor	 	Andrea van den Hooff - UvA
+ * Date        		August 2019
+ ******************************************************************************/
+
 module lang::crds::basicanalysis
 
 import lang::crds::ast;
-
 import lang::crds::grammar;
-import util::NameGraph;
 
+import util::Math;
 
 import Prelude;
 import List;
@@ -12,114 +21,186 @@ import ParseTree;
 import String;
 import Type;
 
+int errorsFound = 0;
+
 loc NULL_LOC = |null://null|(0,0,<0,0>,<0,0>);
 
 data Scope
-  = scope(str scopeName, loc l, map[str defName, loc l] defs, map[str defName, str nodeType] types);
+  = scope(str scopeName,
+  		 loc l,
+  		 map[str defName, loc l] defs,
+  		 map[str defName, str nodeType] types,
+  		 map[str def, list[loc l] uses] refs);
 
-public Scope globalLUT = scope("global", NULL_LOC, (), ());
-public list[ tuple[str def, list[loc l] uses]] refs = [];
 
-void leuk(loc f) {
+/******************************************************************************
+ * Main function.
+ ******************************************************************************/
+ 
+void main(loc f) {
+	// Parse and implode the game file.
 	Tree parsedFile = parse(#CRDS, f);			
 	CRDSII implodedFile = implode(#CRDSII, parsedFile);
 	
-	addIDstoLUT(implodedFile);
-	checkIDstoLUT(implodedFile);
-	addRefs(implodedFile);
-	//println(globalLUT);
+	// Initiliase datatype.
+	Scope lut = scope("global", NULL_LOC, (), (), ());
+	
+	// Add all ID definitions to the LUT and check all uses. 
+	lut = addDefs(implodedFile, lut);
+	if (errorsFound != 0) { println("Errors found. Please adjust your game description accordingly."); return; }	
+	
+	
+	checkDefs(implodedFile, lut);
+	if (errorsFound != 0) { println("Errors found. Please adjust your game description accordingly."); return; }
+	
+	iprintln("Checking uses to types of definitions to LUT");
+	checkTypes(implodedFile, lut);
+	if (errorsFound != 0) { println("Errors found. Please adjust your game description accordingly."); return; }
+	
+	
+	iprintln("Adding references to LUT");
+	// Add all uses to the right references..	
+	lut = addRefs(implodedFile, lut);
+	iprintToFile(|project://DSL/src/lang/crds/samples/refs|, lut.refs);
+	if (errorsFound != 0) { println("Errors found. Please adjust your game description accordingly."); return; }
 }
 
-public void addIDstoLUT(CRDSII c)
+/******************************************************************************
+ * Loop over Tree to put all definitions in a LUT.
+ ******************************************************************************/
+public Scope addDefs(CRDSII c, Scope lut)
 {
 	visit(c) {
-		case card(ID name, _): 							{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "card"); refs += <name.name, [name@location]>; }
-		case team(ID name, _):							{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "team"); refs += <name.name, [name@location]>; }
-		case players(list[Hands] hands):				{ addPlayers(hands); }
-		case deck(ID name, _, _, _):					{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "deck"); refs += <name.name, [name@location]>; }
-		case game(ID name, list[Decl] decls):			{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "game"); refs += <name.name, [name@location]>;}
-		case typedef(ID name, list[Attr] values):		{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "typedef"); foo(values); refs += <name.name, [name@location]>;}
-		case stage(ID name, _, _, _): 					{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "stage"); refs += <name.name, [name@location]>;}	
-		case basic(ID name, _, _):						{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "stage"); refs += <name.name, [name@location]>;}
-		case token(ID name, _, _, _): 					{ globalLUT.defs += (name.name : name@location); globalLUT.types += (name.name: "token"); refs += <name.name, [name@location]>;}
+		case card(Exp exp, _): 							{ if (var(id(str a)) := exp) { lut = addDef(a, exp@location, "card", lut);}}
+		case team(ID name, _):							{ lut = addDef(name.name, name@location, "team", lut);}
+		case players(list[Hands] hands):				{ for (player <- hands) { lut = addDef(player.player, player@location, "player", lut); } }
+		case deck(ID name, _, _, _):					{ lut = addDef(name.name, name@location, "deck", lut);}
+		case game(ID name, _):							{ lut = addDef(name.name, name@location, "game", lut);}
+		case typedef(ID name, list[Exp] values):		{ lut = addDef(name.name, name@location, "typedef", lut); lut = addAttrs(name, values, lut); } // FIX ATTR
+		case stage(ID name, _, _, _): 					{ lut = addDef(name.name, name@location, "stage", lut);}	
+		case basic(ID name, _, _):						{ lut = addDef(name.name, name@location, "stage", lut);}
+		case token(ID name, _, _, _): 					{ lut = addDef(name.name, name@location, "token", lut);}
 	}
-		
+	
+  	return lut;
+}
+
+// Add current definition.
+public Scope addDef(str name, loc l, str nodetype, Scope lut) {
+	if (name in lut.defs) {
+		println("Cannot define <name> as <nodetype>. Please use unique identifiers.");
+		errorsFound += 1;
+		return lut;
+	} else {
+		lut.defs += (name : l);
+		lut.types += (name : nodetype);
+		lut.refs += (name : [l]);
+		return lut;
+	}
+}
+
+public Scope addAttrs(ID name, list[Exp] exps, Scope lut) {
+	
+	for (exp <- exps) {
+		if (var(id(str a)) := exp) { lut = addDef(a, exp@location, name.name, lut); }
+		else if (val(real r) := exp) { lut = addDef(toString(r), exp@location, name.name, lut); }
+	}
+	
+	return lut;
+}
+
+public Scope addRefs(CRDSII c, Scope lut)
+{
+	println("Adding refs");
+	
+	visit(c) {
+		case team(_, list[ID]names): 								{ for (use <- names) { lut = addRef(use, lut); } }
+		case turnorder(list[ID]names): 								{ for (use <- names) { lut = addRef(use, lut); } }
+		case shuffleDeck(ID name): 									{ lut = addRef(name, lut); }
+		case distributeCards(_, ID name, list[ID] players): 		{ lut = addRef(name, lut); for (use <- players) { lut = addRef(use, lut); } }
+		case moveCard(_, list[ID] from, list[ID] to):				{ for (use <- from) { lut = addRef(use, lut); }  for (use <- to) { lut = addRef(use, lut); } }
+ 		case moveToken(_, ID from, ID to):						 	{ lut = addRef(from, lut); lut = addRef(to, lut); }
+		case useToken(ID object):									{ lut = addRef(object, lut); }
+		case returnToken(ID object):								{ lut = addRef(object, lut); }
+		case obtainKnowledge(ID name):								{ lut = addRef(name, lut); }
+		case communicate(list[ID] locations, Exp e):				{ for (use <- locations) { lut = addRef(use, lut); } } // TODO: Exp e
+		case calculateScore(list[ID] objects):						{ for (use <- objects) { lut = addRef(use, lut); } }
+		case Loc(ID name):											{ lut = addRef(name, lut); }
+		//case scoring(
+		//case Exp
+		//case Card(_, attr):
+		case deck(_, _, ID location, _):							{ lut = addRef(location, lut); }
+		//case hands():
+	}
+	
+	return lut;
+}
+
+public Scope addRef(ID use, Scope lut) {
+	try {
+		lut.refs[use.name] += use@location;	
+	} catch NoSuchKey(): errorsFound += 1;
+
+	return lut;
+}
+
+/******************************************************************************
+ * Functions to check ID's on correct usage.
+ ******************************************************************************/
+
+public void checkDefs(CRDSII c, Scope lut)
+{
+	visit(c) {
+		case id(str name): {
+			if (name notin lut.defs) {
+				println("ERROR: Could not find: <name>");
+				errorsFound += 1;
+			}
+		}
+	}		
   	return;
 }
 
 
-public Scope addPlayers(list[Hands] hands) {
-	for (hand <- hands) {
+public void checkTypes(CRDSII c, Scope lut)
+{
+	println("Checking types");
 	
-		if (hand.player in globalLUT.defs) {
-			println("Player <hand.player>  is already defined. Please use unique identifiers.");
-			return NULL;
-		} else
-			globalLUT.defs += (hand.player : hand@location);
-			globalLUT.types += (hand.player : "player");
-		}
-	
-	return globalLUT;
-}
-
-// TO DO: Values of typedef attrs.
-public void foo(list[Attr] values) {
-	//for (v <- values) {
-		//println(v);
+	//visit(c) {
+	//	case team(_, list[ID]names): 								{ for (name <- names) { compareTypes("player", lut.types[name.name]); } }
+	//	case turnorder(list[ID]names): 								{ for (name <- names) { compareTypes("player", lut.types[name.name]); } }
+	//	case shuffleDeck(ID name): 									{ compareTypes("deck", lut.types[name.name]); }
+	//	case distributeCards(_, ID name, list[ID] players): 		{ compareTypes("deck", lut.types[name.name]); for (player <- players) { compareTypes("player", lut.types[player.name]); }}
+	//	case moveCard(_, list[ID] from, list[ID] to):				{ for (f <- from) { compareTypes("deck", lut.types[f.name]); } for (t <- to) { compareTypes("deck", lut.types[t.name]); }}
+ //		case moveToken(_, ID from, ID to):						 	{ compareTypes("location", lut.types[from.name]); compareTypes("location", lut.types[to.name]);}
+	//	case useToken(ID object):									{ compareTypes("token", lut.types[object.name]); }
+	//	case returnToken(ID object):								{ compareTypes("token", lut.types[object.name]); }
+	//	case communicate(list[ID] locations, Exp e):				{ for (l <- locations) { compareTypes("Location", lut.types[l.name]) }; } // TO FIX
+	//	case calculateScore(list[ID] objects):						{ for (object <- objects) { compareTypes("deck", lut.types[object.name]); }} // TO FIX
+	//	case Loc(ID name):											{ compareTypes("location", lut.types[name.name]);}
+	//	//case obtainKnowledge(ID name):							{ } // TO FIX		
+	//	//case scoring(str name, _):									{ if (name != "each") compareTypes("card", lut.types[name]); } // only cards?
+ //	//	case var(ID name):											{ } // TO FIX	
+ //	//	case obj(ID name, ID attr): 								{ } // TO FIX	
 	//}
 	
 	return;
 }
 
+/******************************************************************************
+ * Helper functions.
+ ******************************************************************************/
 
-public void checkIDstoLUT(CRDSII c)
-{
-	println("Checking IDs");
-	
-	visit(c) {
-		case id(str name): { if (name notin globalLUT.defs) println("ERROR: Could not find: <name>");}
-	}
-	
-	println("Finished");
-		
-  	return;
+public str getLoc (str s) {
+	return substring(s, findFirst(s, "|"), findLast(s, ","));	
 }
 
-public void addRefs(CRDSII c)
-{
-	visit(c) {
-		case team(_, list[ID]names): 								{ addIDs(names); }
-		case turnorder(list[ID]names): 								{ addIDs(names); }
-		case shuffleDeck(ID name): 									{ addIDs(name); }
-		case distributeCards(_, ID name, list[ID] players): 		{ addIDs(name); addIDs(players); }
-		case moveCard(_, list[ID] from, list[ID] to):				{ addIDs(from); addIDs(to); }
- 		case moveToken(_, ID from, ID to):						 	{ addIDs(from); addIDs(to); }
-		case useToken(ID object):									{ addIDs(object); }
-		case returnToken(ID object):								{ addIDs(object); }
-		case obtainKnowledge(ID name):								{ addIDs(object); }
-		case communicate(list[ID] locations, Attr attr):			{ addIDs(locations); } 
-		case calculateScore(list[ID] objects):						{ addIDs(objects); }
-//		case Loc (hands, attr)
-//		case scoring
-// 		case Exp
+public void compareTypes(str s, str t) {
+	if (s != t) {
+		println("<s> :: <t>");
+	 	println("Found a type error");
+		errorsFound += 1;
 	}
 	
 	return;
 }
-
-
-public void addIDs (list[ID] names) {
-	for (name <- names) {
-		println(name);
-		println(name@location);
-	}
-	return;
-}
-
-public void addIDs (ID name) {
-	println(name);
-	println(name@location);
-	
-	return;
-}
-

@@ -12,7 +12,7 @@ players
 
 
 
- =                        [A]
+ =                        [A has bla]
 rules=[players				
 
 			=1to1,											scoring=[D4=4,
@@ -38,5 +38,5 @@ tokens = [
 	 
 	 
 	 4]									 locatie				
-	 					 all [							]
+	 					 all
 ]

@@ -5,20 +5,19 @@ typedef values = [1 .. 100]
 team uno = [A, B, C, D]
 team duo = [Q]
 
-players = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
+players = [A has BLABLA, B has BLABLA, C has BLABLA, D has BLABLA, E has BLABLA, F has BLABLA, G has BLABLA, H has BLABLA, I has BLABLA, J has BLABLA, K has BLABLA, L has BLABLA, M has BLABLA, N has BLABLA, O has BLABLA, P has BLABLA, Q has BLABLA, R has BLABLA, S has BLABLA, T has BLABLA, U has BLABLA, V has BLABLA, W has BLABLA, X has BLABLA, Y has BLABLA]
 
 rules = [ players = 1 to 2 ]
 rules = [ scoring =  [great = 10, amazing = 100] ]
 
 tokens = 
 [
-	T1 = [3] P0 all everyone draw [],
-	T2 = [1000] P1 team hand return [while 4 == 3],
-	T3 = [0] P2 use [if 10 != 11 then shuffle Deck123],
-	T444 = [3] P0 all everyone draw [],
-	T5 = [1000] P1 team hand return [while 4 == 3],
-	TQADSBU = [0] P2 use [if 10 != 11 then shuffle Deck123]
-]
+	T1 = [3] P0 all everyone draw ,
+	T2 = [1000] P1 team hand return,
+	T3 = [0] P2 use,
+	T444 = [3] P0 all everyone draw ,
+	T5 = [1000] P1 team hand return,
+	TQADSBU = [0] P2 use]
 
 
 gameflow = [
@@ -27,13 +26,13 @@ gameflow = [
 ]
 
 
-deck handplayerF = [] handplayerF hand []
+deck handplayerF = [] handplayerF hand 
 
 deck alles = [
 	heart4 = [hearts, 4],
 	club6 = [clubs, 6],
 	spades10 = [spades, 10],
 	diamondsking = [diamonds, king]
-] startingpile everyone [while condition, while 24, if 3 <= 4 then takeCard startingpile handplayerA ]
+] startingpile everyone
 
 typedef bla = [bla]

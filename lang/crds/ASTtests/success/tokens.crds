@@ -2,9 +2,9 @@ game testtokens
 
 tokens = 
 [
-	T1 = [3] P0 all everyone draw [],
-	T2 = [1000] P1 team hand return [while 4 == 3],
-	T3 = [0] P2 use [if 10 != 11 then shuffle Deck123]
+	T1 = [3] P0 all everyone draw ,
+	T2 = [1000] P1 team hand return,
+	T3 = [0] P2 use
 ]
 
-tokens = [ T = [1] P3 all [] ]
+tokens = [ T = [1] P3 all]

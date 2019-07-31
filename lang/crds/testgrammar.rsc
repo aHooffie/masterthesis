@@ -49,7 +49,7 @@ void testSuccesses(loc successes) {
 	println("\n--------------------------------------------------------------------------\n There are <size(successes.ls)> correctly written files. \n--------------------------------------------------------------------------");
 		
 	for (file <- successes.ls) { 
-		//println("Parsing: <file>");
+		println("Parsing: <file>");
 		try {
 			Tree parsedFile = parse(#CRDS, file);
 			nparsed += 1;

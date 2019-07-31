@@ -21,8 +21,8 @@ start syntax CRDS
 
 syntax Decl
  = @Category="Decl"
-   typedef: "typedef" ID "=" "[" {Attr ","}+ "]" 			// E.g. names, values, colours.
- | deck: "deck" ID "=" "[" {Card ","}* "]" Loc Prop+ // "[" {Condition ","}* "]"
+   typedef: "typedef" ID "=" "[" {Exp ","}+ "]" 			// E.g. names, values, colours.
+ | deck: "deck" ID "=" "[" {Card ","}* "]" ID Prop+ // "[" {Condition ","}* "]"
  | team: "team" ID "=" "[" {ID ","}+ "]" 					// No teams defined == FFA.
  | gameflow: "gameflow" "=" "[" Turnorder {Stage ","}+ "]"
  | players: "players" "=" "[" {Hands ","}+ "]"
@@ -30,10 +30,10 @@ syntax Decl
  | rules: "rules" "=" "[" {Rule ","}+ "]";  
  
 syntax Card
- = card: Attr "=" "[" {Attr ","}+ "]";
+ = card: Exp "=" "[" {Exp ","}+ "]";
 
 syntax Token
- = token: ID "=" "[" VALUE "]" Loc Prop+; // "[" {Condition ","}* "]";
+ = token: ID "=" "[" VALUE "]" ID Prop+; // "[" {Condition ","}* "]";
  
 syntax Rule 												// General rules.
  = playerCount: "players" "=" VALUE "to" VALUE
@@ -55,12 +55,12 @@ syntax Action																// Specific rules
  = @Category="Action" shuffleDeck: "shuffle" ID 							// DeckID
  | distributeCards: "distribute" VALUE "from" ID "to" "[" {ID ","}+ "]" 				// CardAmount, DeckID , List of Players
  | takeCard: "takeCard" ID ID
- | moveCard: "moveCard" Attr "from" "[" {ID ","}+ "]" "to" "[" {ID ","}+ "]"
+ | moveCard: "moveCard" Exp "from" "[" {ID ","}+ "]" "to" "[" {ID ","}+ "]"
  | moveToken: "moveToken" VALUE "from" ID "to" ID
  | useToken: "useToken" ID
  | returnToken: "returnToken" ID
  | obtainKnowledge: "getInfo" ID
- | communicate: "giveHint" "[" {ID ","}* "]" Attr
+ | communicate: "giveHint" "[" {ID ","}* "]" Exp
  | changeTurnorder: "changeTurns" Turnorder
  | calculateScore: "calculateScore" ID+
  | endGame: "endGame"
@@ -100,12 +100,6 @@ syntax Scoring
 
 syntax Hands 
  = hands: ID "has" ID; 
- 
-syntax Loc
- = ID;
- 
-syntax Attr
- = ID | val: VALUE | LIST;
 
 syntax Condition // TO DO!!
  = deckCondition: "if" Exp "then" Action
@@ -115,6 +109,7 @@ syntax Condition // TO DO!!
 syntax Exp
  = var: ID
  | val: VALUE
+ | l: LIST
  | obj: ID"."ID
  | empty: "empty"
  > left (
@@ -135,6 +130,7 @@ syntax ID
 
 syntax LIST 											// TO DO
  = l: "[" VALUE ".." VALUE "]";
+
 
 syntax BOOL
  = @category="String" tru: "true" | fal: "false"; 		// TO DO

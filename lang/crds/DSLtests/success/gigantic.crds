@@ -11,18 +11,18 @@ deck alles = [
 	club6 = [clubs, 6],
 	spades10 = [spades, 10],
 	diamondsking = [diamonds, king]
-] startingpile everyone [while condition, while 24, if 3 <= 4 then takeCard startingpile handplayerA ]
+] startingpile everyone
 
-deck handplayerA = [] handplayerA hand []
-deck handplayerB = [] handplayerB hand []
-deck handplayerC = [] handplayerC hand []
-deck handplayerD = [] handplayerD hand []
-deck handplayerE = [] handplayerE hand []
-deck handplayerF = [] handplayerF hand []
+deck handplayerA = [] handplayerA hand
+deck handplayerB = [] handplayerB hand
+deck handplayerC = [] handplayerC hand
+deck handplayerD = [] handplayerD hand
+deck handplayerE = [] handplayerE hand 
+deck handplayerF = [] handplayerF hand 
 
 deck mystery = [
 	cardini = [blue, 4]
-] mysteryloc none []
+] mysteryloc none
 
 team uno = [A, B, C, D]
 team duo = [Q]
@@ -38,8 +38,8 @@ gameflow = [
 
 gameflow = [ 
 	turnorder = [A]
-	stage two = all [ req moveCard ID1 ID2 ID3, opt calculateScore ],
-	stage four = turns [ req shuffle ID0, req moveToken ID001 ID002 ID003, opt getInfo Boo]
+	stage two = all [ req moveCard ID1 from [ID2] to [ID3], opt calculateScore r w g b l],
+	stage four = turns [ req shuffle ID0, req moveToken 1 from ID002 to ID003, opt getInfo Boo]
 ]
 
 gameflow = [ 
@@ -47,22 +47,17 @@ gameflow = [
 	stage ONE = dealer []
 ]
 
-players = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
-
-players = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
-
-players = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
+players = [A has B, C has D, E has F, G has I]
 
 tokens = 
 [
-	T1 = [3] P0 all everyone draw [],
-	T2 = [1000] P1 team hand return [while 4 == 3],
-	T3 = [0] P2 use [if 10 != 11 then shuffle Deck123],
-	T444 = [3] P0 all everyone draw [],
-	T5 = [1000] P1 team hand return [while 4 == 3],
-	TQADSBU = [0] P2 use [if 10 != 11 then shuffle Deck123]
+	T1 = [3] P0 all everyone draw,
+	T2 = [1000] P1 team hand return,
+	T3 = [0] P2 use ,
+	T444 = [3] P0 all everyone draw ,
+	T5 = [1000] P1 team hand return,
+	TQADSBU = [0] P2 use 
 ]
-
 
 rules = [ players = 1 to 2 ]
 rules = [ scoring =  [great = 10, amazing = 100] ]

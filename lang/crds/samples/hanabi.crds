@@ -2,7 +2,7 @@ game Hanabi
 
 typedef Value = [1, 2, 3, 4, 5]
 typedef Colour = [blue, green, red, white, yellow]
-typedef Location = [bluepile, greenpile, redpile, whitepile, yellowpile, discardpile, drawpile, handA, handB, handC]
+typedef Location = [bluepile, greenpile, redpile, whitepile, yellowpile, discardpile, drawpile, handA, handB, handC, tablelives, tablehints]
 
 deck allCards = 
 [
@@ -58,15 +58,15 @@ deck allCards =
 	W5 =  [white, 5]
 ] drawpile none
 
-deck yellow = 	[] yellowpile 	top everyone
-deck green = 	[] greenpile 	top everyone 	
-deck red = 		[] redpile 		top everyone 	
-deck white = 	[] whitepile 	top everyone 	
-deck blue = 	[] bluepile 	top everyone 	
+deck yellowPile = 	[] yellowpile 	top everyone
+deck greenPile = 	[] greenpile 	top everyone 	
+deck redPile = 		[] redpile 		top everyone 	
+deck whitePile = 	[] whitepile 	top everyone 	
+deck bluePile = 	[] bluepile 	top everyone 	
 deck discardPile = [] discardpile all everyone 	
-deck handA = [] handA all hanabi 
-deck handB = [] handB all hanabi 
-deck handC = [] handC all hanabi 
+deck handPlayerA = [] handA all hanabi 
+deck handPlayerB = [] handB all hanabi 
+deck handPlayerC = [] handC all hanabi 
 
 team allPlayers = [A, B, C]
 

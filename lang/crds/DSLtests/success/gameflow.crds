@@ -8,8 +8,8 @@ gameflow = [
 
 gameflow = [ 
 	turnorder = [A]
-	stage two = all [ req moveCard ID1 ID2 ID3, opt calculateScore ],
-	stage four = turns [ req shuffle ID0, req moveToken ID001 ID002 ID003, opt getInfo Boo]
+	stage two = all [ req moveCard ID1 from [ID2] to [ID3], opt calculateScore red white blue green yellow],
+	stage four = turns [ req shuffle ID0, req moveToken 1 from ID002 to ID003, opt getInfo Boo]
 ]
 
 gameflow = [ 

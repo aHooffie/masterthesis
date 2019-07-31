@@ -5,10 +5,10 @@ deck alles = [
 	club6 = [clubs, 6],
 	spades10 = [spades, 10],
 	diamondsking = [diamonds, king]
-] startingpile everyone [while condition, while 24, if 3 <= 4 then takeCard startingpile handplayerA ]
+] startingpile everyone
 
-deck handplayerA = [] handplayerA hand []
+deck handplayerA = [] handplayerA hand
 
 deck mystery = [
 	cardini = [blue, 4]
-] mysteryloc none []
+] mysteryloc none

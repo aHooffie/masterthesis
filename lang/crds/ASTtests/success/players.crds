@@ -1,5 +1,4 @@
 game testplayers
 
-players = [playerA, playerB, playerC]
-players = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z]
-players = [playerthreehundred]
+players = [A has BLABLA, B has BLABLA, C has BLABLA, D has BLABLA, E has BLABLA, F has BLABLA, G has BLABLA, H has BLABLA, I has BLABLA, J has BLABLA, K has BLABLA, L has BLABLA, M has BLABLA, N has BLABLA, O has BLABLA, P has BLABLA, Q has BLABLA, R has BLABLA, S has BLABLA, T has BLABLA, U has BLABLA, V has BLABLA, W has BLABLA, X has BLABLA, Y has BLABLA]
+players = [playerthreehundred has blablabla]

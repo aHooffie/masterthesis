@@ -23,14 +23,12 @@ anno loc CRDSII@location;
 anno loc Decl@location;
 
 anno loc Action@location;
-anno loc Attr@location;
 anno loc BOOL@location;
 anno loc Card@location;
 anno loc Condition@location;
 anno loc Exp@location;
 anno loc ID@location;
 anno loc Hands@location;
-anno loc Loc@location;
 anno loc Playerlist@location;
 anno loc Rule@location;
 anno loc Scoring@location;
@@ -52,8 +50,8 @@ data CRDSII
  = game(ID name, list[Decl] decls);
 
 data Decl
- = typedef	(ID name, list[Attr] values) 
- | deck		(ID name, list[Card] cards, Loc location, list[Prop] props)//, list[Condition] cdns)
+ = typedef	(ID name, list[Exp] values) 
+ | deck		(ID name, list[Card] cards, ID location, list[Prop] props)//, list[Condition] cdns)
  | team		(ID name, list[ID] names)
  | gameflow (Turnorder order, list[Stage] stages)
  | players	(list[Hands] hands)
@@ -61,10 +59,10 @@ data Decl
  | rules	(list[Rule] rules);
 
 data Card 
- = card(ID name, list[Attr] attrs);
+ = card(Exp name, list[Exp] attrs);
 
 data Token 
- = token(ID name, real r, Loc location, list[Prop] props);//, list[Condition] cdns); 
+ = token(ID name, real r, ID location, list[Prop] props);//, list[Condition] cdns); 
  
 data Rule 
  = playerCount(int min, int max)
@@ -84,12 +82,12 @@ data Action
  = shuffleDeck(ID name)
  | distributeCards(real r, ID name, list[ID] players)
  | takeCard(ID f, ID t)
- | moveCard(Attr attr, list[ID] from, list[ID] to)
+ | moveCard(Exp e, list[ID] from, list[ID] to)
  | moveToken(real index, ID f, ID t)
  | useToken(ID object)
  | returnToken(ID object)
  | obtainKnowledge(ID name) 		// TO FIX. 
- | communicate(list[ID] locations, Attr attr)
+ | communicate(list[ID] locations, Exp e)
  | changeTurnorder(Turnorder order)
  | calculateScore(list[ID] objects)
  | sequence(Action first, Action then);
@@ -100,15 +98,9 @@ data Action
 data Prop
  = visibility(Vis vis)
  | usability(Usa usa);
-
-data Attr
- = id(str name) | val(real r) | l(real min, real max); 
- 
-data Loc
- = id(str name); 
  
 data Hands 
- = hands(str player, str location);
+ = hands(str player, ID location);
  
 data Vis
  = allcards() | none() | top() | everyone() | team() | hand() | hanabi();
@@ -131,6 +123,7 @@ data Condition
 data Exp
 = var(ID name)
 | val(real r)
+| l(LIST l)
 | obj(ID name, ID attr)
 | empty()
 | gt(Exp e1, Exp e2)
