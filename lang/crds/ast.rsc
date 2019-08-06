@@ -90,7 +90,8 @@ data Action
  | communicate(list[ID] locations, Exp e)
  | changeTurnorder(Turnorder order)
  | calculateScore(list[ID] objects)
- | sequence(Action first, Action then);
+ | sequence(Action first, Action then)
+ | endGame();
  
 /******************************************************************************
  * Main properties of objects.

@@ -7,7 +7,7 @@
  * Contributor	 	Andrea van den Hooff - UvA
  * Date        		August 2019
  ******************************************************************************/
-module lang::crds::testast
+module lang::crds::testAST
 
 import lang::crds::grammar;
 import lang::crds::ast;

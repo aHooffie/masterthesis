@@ -8,7 +8,7 @@
  * Date        		August 2019
  ******************************************************************************/
 
-module lang::crds::testgrammar
+module lang::crds::testGrammar
 
 import IO;
 import ParseTree;
