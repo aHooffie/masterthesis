@@ -12,11 +12,14 @@ module lang::crds::rulecheck
 
 import lang::crds::analysis;
 import lang::crds::ast;
+import util::Prompt;
 
 import IO;
 import List;
 import Set;
 
+data ruleSet 
+ = r(map[str def, list[Action] actions] rules);
 
 /******************************************************************************
  * Main function to loop over tree created of the grammar.
@@ -29,19 +32,21 @@ void foo() {
 	list[str] knownPlayers = [];
 	bool scoring = false;
 	int knownCards = 0;
+	ruleSet r = r(());
 	
 	visit(AST) {
 		case playerCount(int min, int max): 	{ checkPlayers(min, max); }
 		case turnorder(list[ID] names): 		{ checkTurnorder(names); }
 		case token(_, real r, _, _):			{ checkToken(r); }
-		case basic(_, _, list[Turn] turns): 	{ checkTurns(turns); }
 		case deck(_, list[Card] cards, _, _):	{ knownCards = countCards(knownCards, cards); }
 		case team(_, list[ID] names):			{ knownTeams = checkTeam(knownTeams, names); }
 		case hands(str player, _):				{ if (player notin knownPlayers) knownPlayers += player; }
 		case s(_,_):							{ scoring = true; }
 		case allcards(_): 						{ scoring = true; }
 		case totalTurns(Exp e): 				{ checkTurncount(e); }
-		case stage(_, list[Condition] cdns, _, list[Turn] turns): {	checkConditions(cdns); checkTurns(turns); }
+		case stage(_, list[Condition] cdns,
+			 _, list[Turn] turns): 				{ checkConditions(cdns); }
+		case Action a: 							{ r = addRule(r, a); }
 	}	
 	
 	checkCards(knownCards);
@@ -49,11 +54,64 @@ void foo() {
 	
 	if (scoring == false) println("There is no scoring principle. Please double check and fix this rule.");
 	
-	println(testtt);
-	
+	//printRules(r);
+		
 	return;
 }
 
+/******************************************************************************
+ * Functions to create the sets of rules.
+ ******************************************************************************/
+
+ruleSet addRule(ruleSet r, Action a) {
+	visit (a) {
+		case shuffleDeck(ID name): 									{ r = addAction(r, name.name, a); }
+ 		case returnToken(ID object):								{ r = addAction(r, object.name, a); }
+ 		case useToken(ID object): 									{ r = addAction(r, object.name, a); }
+		case takeCard(ID f, ID t):									{ r = addAction(r, f.name, a); r = addAction(r, t.name, a); }
+ 		case moveToken(real index, ID f, ID t):						{ r = addAction(r, f.name, a); r = addAction(r, t.name, a); }
+		case distributeCards(_, ID name, list[ID] locations): 		{ r = addAction(r, name.name, a); 
+ 																	  for (l <- locations) r = addAction(r, l.name, a); }
+		case moveCard(Exp e, list[ID] from, list[ID] to):  			{ for (name <- from) r = addAction(r, name.name, a); 
+																	  for (name <- to) r = addAction(r, name.name, a); }
+		case communicate(list[ID] locations, Exp e): 				{ for (name <- locations) r = addAction(r, name.name, a); }
+ 		case calculateScore(list[ID] objects): 						{ for (name <- objects) r = addAction(r, name.name, a); }
+	 	//	case obtainKnowledge(ID name): {} 		// TO FIX. 
+ 		
+	}
+	
+	return r;
+}
+
+ruleSet addAction(ruleSet r, str name, Action a) {
+	if (name in r.rules.def) {
+		r.rules[name] += a;
+	} else {
+		r.rules += (name : [a]);
+	}
+	
+	return r;
+}
+
+
+void printRules(ruleSet r) {
+	str boo = "";
+	do { boo = prompt("We have found rules for the following variables:\n <r.rules.def>.\n For which variable would you like to see the actions?");
+		if (boo in r.rules) {
+			println("\n------------------------------------------------------------------------");
+			println("For the following variable: <boo>, the next rules have been found:");
+			println("------------------------------------------------------------------------");
+				
+			try {
+				for (rule <- r.rules[boo]) {
+					println(readFile(rule@location));
+				}
+			} catch NoSuchKey(): return;
+		}
+	} while (boo in r.rules);
+	
+	return;
+}
 
 /******************************************************************************
  * Small helper functions to check simple rules on their validity. 
@@ -77,8 +135,8 @@ void checkToken(real r) {
 
 void checkTurncount(Exp e) {
 	if (val(real r) := e) {
-		if (r < 2 )
-			println("The amount of turns cannot be 1 or negative. Please fix this rule."); 
+		if (r < 1 )
+			println("The amount of turns cannot be negative. Please fix this rule."); 
 	}
 	return;
 }
@@ -107,15 +165,30 @@ list[str] checkTeam(list[str] knownTeams, list[ID] names) {
 	return knownTeams;
 }
 
-void checkTurns(list[Turn] turns) {
-	println("TURNS");
-	iprintln(turns);
-	return;
-}
-
 void checkConditions(list[Condition] cdns) {
-	println("CONDITIONS");
-	iprintln(cdns);
+	for (cdn <- cdns) {
+		if (stageCondition(Exp e) := cdn) {
+			if (gt(Exp e1, Exp e2) := e) { // CHECK INTEGER COMPARISONS
+				if (val(real r1) := e1 && val(real r2) := e2 && r1 > r2) println("The condition [<r1> \> <r2>] is always true.");
+				else if (val(real r1) := e1 && val(real r2) := e2 && r1 < r2) println("The condition [<r1> \> <r2>] is never true.");
+			} else if ( ge(Exp e1, Exp e2) := e) {
+				if (val(real r1) := e1 && val(real r2) := e2 && r1 > r2) println("The condition [<r1> \>= <r2>]is always true.");
+				else if (val(real r1) := e1 && val(real r2) := e2 && r1 < r2) println("The condition [<r1> \>= <r2>]is never true.");
+			} else if (lt(Exp e1, Exp e2) := e) {
+				if (val(real r1) := e1 && val(real r2) := e2 && r1 < r2) println("The condition [<r1> \< <r2>]is always true.");
+				else if (val(real r1) := e1 && val(real r2) := e2 && r1 > r2) println("The condition [<r1> \< <r2>]is never true.");
+			} else if (le(Exp e1, Exp e2) := e) {
+				if (val(real r1) := e1 && val(real r2) := e2 && r1 < r2) println("The condition [<r1> \<= <r2>]is always true.");
+				else if (val(real r1) := e1 && val(real r2) := e2 && r1 > r2) println("The condition [<r1> \<= <r2>]is never true.");
+			} else if (eq(Exp e1, Exp e2) := e) {
+				if (val(real r1) := e1 && val(real r2) := e2 && r1 == r2) println("The condition [<r1> == <r2>]is always true.");
+				else if (val(real r1) := e1 && val(real r2) := e2 && r1 != r2) println("The condition [<r1> == <r2>]is never true.");
+			} else if (neq(Exp e1, Exp e2) := e) { 
+				if (val(real r1) := e1 && val(real r2) := e2 && r1 != r2) println("The condition [<r1> != <r2>]is always true.");
+				else if (val(real r1) := e1 && val(real r2) := e2 && r1 == r2) println("The condition [<r1> != <r2>]is never true.");
+			}
+		}
+	}
+	
 	return;
 }
-

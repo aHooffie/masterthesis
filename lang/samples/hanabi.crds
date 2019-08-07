@@ -84,8 +84,8 @@ rules = [
 
 gameflow = [	
 	turnorder = [A, B, C]
-	stage dealing = dealer [req shuffle allCards, req distribute 5 from allCards to [A, B, C]],
-	stage midgame = while allCards != empty, while lives != 0 turns
+	stage dealing = dealer [req shuffle allCards, req distribute 5 from allCards to [handPlayerA, handPlayerB, handPlayerC]],
+	stage midgame = while 3 > 4, while lives != 0 turns
 		[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
 				giveHint [handPlayerA, handPlayerB, handPlayerC] Colour and then useToken hints,
 				moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile]

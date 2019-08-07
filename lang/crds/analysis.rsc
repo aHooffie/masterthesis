@@ -25,8 +25,8 @@ int errorsFound = 0;
 
 loc NULL_LOC = |null://null|(0,0,<0,0>,<0,0>);
 
-data Scope
-  = scope(str scopeName,
+data LUT
+  = lut(str scopeName,
   		 loc l,
   		 map[str defName, loc l] defs,
   		 map[str defName, str nodeType] types,
@@ -41,12 +41,12 @@ CRDSII createTree(loc f) {
 	return implode(#CRDSII, parsedFile);
 }
 
-Scope createLUT(loc f) {
+LUT createLUT(loc f) {
 	// Parse and implode the game file.
 	CRDSII implodedFile = createTree(f);
 	
 	// Initiliase datatype.
-	Scope lut = scope("global", NULL_LOC, (), (), ());
+	LUT lut = lut("global", NULL_LOC, (), (), ());
 	
 	// Add all ID definitions to the LUT and check all uses.
 	lut = addDefs(implodedFile, lut);
@@ -70,7 +70,7 @@ Scope createLUT(loc f) {
 /******************************************************************************
  * Loop over Tree to put all definitions in a LUT.
  ******************************************************************************/
-public Scope addDefs(CRDSII c, Scope lut)
+LUT addDefs(CRDSII c, LUT lut)
 {
 	visit(c) {
 		case card(Exp exp, _): 							{ if (var(id(str a)) := exp) { lut = addDef(a, exp@location, "card", lut);}}
@@ -89,7 +89,7 @@ public Scope addDefs(CRDSII c, Scope lut)
 }
 
 // Add constructor definition to LUT.
-public Scope addDef(str name, loc l, str nodetype, Scope lut) {
+LUT addDef(str name, loc l, str nodetype, LUT lut) {
 	if (name in lut.defs) {
 		println("Cannot define <name> as <nodetype>. Please use unique identifiers.");
 		errorsFound += 1;
@@ -103,7 +103,7 @@ public Scope addDef(str name, loc l, str nodetype, Scope lut) {
 }
 
 // Special case: Attributes (in Card, Token & Typedef)
-public Scope addAttrs(ID name, list[Exp] exps, Scope lut) {
+LUT addAttrs(ID name, list[Exp] exps, LUT lut) {
 	for (exp <- exps) {
 		if (var(id(str a)) := exp) { lut = addDef(a, exp@location, name.name, lut); }
 		else if (val(real r) := exp) { lut = addDef(toString(r), exp@location, name.name, lut); }
@@ -113,7 +113,7 @@ public Scope addAttrs(ID name, list[Exp] exps, Scope lut) {
 }
 
 // Loop over tree to add the references to defined variables.
-public Scope addRefs(CRDSII c, Scope lut)
+LUT addRefs(CRDSII c, LUT lut)
 {	
 	visit(c) {
 		case deck(_, _, ID location, _):							{ lut = addRef(location, lut); }
@@ -129,8 +129,8 @@ public Scope addRefs(CRDSII c, Scope lut)
 		case hands(_, ID location):									{ lut = addRef(location, lut); }
 		
 		case shuffleDeck(ID name): 									{ lut = addRef(name, lut); }
-		case distributeCards(_, ID name, list[ID] players): 		{ lut = addRef(name, lut);
-																	  for (use <- players) { lut = addRef(use, lut); } }
+		case distributeCards(_, ID name, list[ID] locations): 		{ lut = addRef(name, lut);
+																	  for (use <- locations) { lut = addRef(use, lut); } }
 		case moveCard(_, list[ID] from, list[ID] to):				{ for (use <- from) { lut = addRef(use, lut); }  
 																	  for (use <- to) { lut = addRef(use, lut); } }
  		case moveToken(_, ID from, ID to):						 	{ lut = addRef(from, lut);
@@ -144,7 +144,7 @@ public Scope addRefs(CRDSII c, Scope lut)
 }
 
 // Add constructor referral to LUT.
-public Scope addRef(ID use, Scope lut) {
+LUT addRef(ID use, LUT lut) {
 	try {
 		if (use@location notin lut.refs[use.name]) {
 			lut.refs[use.name] += use@location;	
@@ -155,7 +155,7 @@ public Scope addRef(ID use, Scope lut) {
 }
 
 // Special case: Attributes (in Card, Token & Typedef)
-public Scope addAttrRefs(list[Exp] exps, Scope lut) {
+LUT addAttrRefs(list[Exp] exps, LUT lut) {
 	for (exp <- exps) {
 		if (var(id(str a)) := exp) {
 			try {
@@ -172,7 +172,7 @@ public Scope addAttrRefs(list[Exp] exps, Scope lut) {
 }
 
 // Special case: Scores
-public Scope addScores(list[Scoring] scores, Scope lut) {
+LUT addScores(list[Scoring] scores, LUT lut) {
 	for (score <- scores) {
 		try {
 			if (s(str name, real r) := score) 
@@ -187,7 +187,7 @@ public Scope addScores(list[Scoring] scores, Scope lut) {
  * Functions to check ID's on correct usage.
  ******************************************************************************/
 
-public void checkDefs(CRDSII c, Scope lut)
+void checkDefs(CRDSII c, LUT lut)
 {
 	visit(c) {
 		case id(str name): {
@@ -201,7 +201,7 @@ public void checkDefs(CRDSII c, Scope lut)
 }
 
 // Compare types of referrals to definitions. TO DO: Attributes.
-public void checkTypes(CRDSII c, Scope lut)
+void checkTypes(CRDSII c, LUT lut)
 {
 	println("Checking types");
 	
@@ -213,8 +213,8 @@ public void checkTypes(CRDSII c, Scope lut)
 	 	case communicate(list[ID] locations, Exp e):				{ for (use <- locations) { lut = checkRef(use, "deck", lut); } } // TODO: Exp e
 		
 		case shuffleDeck(ID name): 									{ lut = checkRef(name, "deck", lut); }
-		case distributeCards(_, ID name, list[ID] players): 		{ lut = checkRef(name, "deck", lut);
-																	  for (use <- players) { lut = checkRef(use, "player", lut); } }
+		case distributeCards(_, ID name, list[ID] locations): 		{ lut = checkRef(name, "deck", lut);
+																	  for (use <- locations) { lut = checkRef(use, "location", lut); } }
  		case moveToken(_, ID from, ID to):						 	{ lut = checkRef(from, "token", lut);
  																	  lut = checkRef(to, "token", lut); }
 		case useToken(ID object):									{ lut = checkRef(object, "token", lut); }
@@ -235,7 +235,7 @@ public void checkTypes(CRDSII c, Scope lut)
 
 	
 // Check the types of all referrals to LUT.
-public Scope checkRef(ID use, str nodeType, Scope lut) {
+LUT checkRef(ID use, str nodeType, LUT lut) {
 	try {
 		if (nodeType == "typedef") {
 			list[str] typedefs = getTypedefs(lut);
@@ -253,14 +253,14 @@ public Scope checkRef(ID use, str nodeType, Scope lut) {
 	return lut;
 }	
 
-public list[str] getTypedefs(Scope lut) {
+list[str] getTypedefs(LUT lut) {
 	list[str] typedefs = [];
 	
 
 }
 
 // Special case: Attributes (in Card, Token & Typedef)
-//public Scope checkAttrs(ID name, list[Exp] exps, Scope lut) {
+//LUT checkAttrs(ID name, list[Exp] exps, LUT lut) {
 //	for (exp <- exps) {
 //		if (var(id(str a)) := exp) { lut = checkRef(id(str a), exp@location, name.name, lut); }
 //		else if (val(real r) := exp) { lut = addDef(toString(r), exp@location, name.name, lut); }
@@ -273,10 +273,10 @@ public list[str] getTypedefs(Scope lut) {
  * Helper functions.
  ******************************************************************************/
 
-public str getLoc (str s) {
+str getLoc (str s) {
 	return substring(s, findFirst(s, "|"), findLast(s, ","));	
 }
 
-public bool compareTypes(str s, str t) {
+bool compareTypes(str s, str t) {
 	return (s == t);
 }

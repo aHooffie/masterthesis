@@ -80,7 +80,7 @@ data Turn
 
 data Action
  = shuffleDeck(ID name)
- | distributeCards(real r, ID name, list[ID] players)
+ | distributeCards(real r, ID name, list[ID] locations)
  | takeCard(ID f, ID t)
  | moveCard(Exp e, list[ID] from, list[ID] to)
  | moveToken(real index, ID f, ID t)
