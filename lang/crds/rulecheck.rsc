@@ -26,7 +26,6 @@ data ruleSet
  ******************************************************************************/
 void foo() {
 	CRDSII AST = createTree(|project://masterthesis/src/lang/samples/hanabi.crds|);
-	//Scope LUT = createLUT(|project://masterthesis/src/lang/samples/hanabi.crds|);
 	
 	list[str] knownTeams = [];
 	list[str] knownPlayers = [];
@@ -54,7 +53,7 @@ void foo() {
 	
 	if (scoring == false) println("There is no scoring principle. Please double check and fix this rule.");
 	
-	//printRules(r);
+	//printRules(r); // Prints links out, but since so maany rather on request
 		
 	return;
 }
@@ -68,7 +67,8 @@ ruleSet addRule(ruleSet r, Action a) {
 		case shuffleDeck(ID name): 									{ r = addAction(r, name.name, a); }
  		case returnToken(ID object):								{ r = addAction(r, object.name, a); }
  		case useToken(ID object): 									{ r = addAction(r, object.name, a); }
-		case takeCard(ID f, ID t):									{ r = addAction(r, f.name, a); r = addAction(r, t.name, a); }
+		case takeCard(ID f, list[ID] t):							{ r = addAction(r, f.name, a); 
+																	  for (name <- t) r = addAction(r, name.name, a); }
  		case moveToken(real index, ID f, ID t):						{ r = addAction(r, f.name, a); r = addAction(r, t.name, a); }
 		case distributeCards(_, ID name, list[ID] locations): 		{ r = addAction(r, name.name, a); 
  																	  for (l <- locations) r = addAction(r, l.name, a); }
@@ -116,7 +116,6 @@ void printRules(ruleSet r) {
 /******************************************************************************
  * Small helper functions to check simple rules on their validity. 
  ******************************************************************************/
-
 int countCards(int knownCards, list[Card] cards) {
 	return knownCards += size(cards);
 }

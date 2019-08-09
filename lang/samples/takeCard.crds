@@ -58,10 +58,10 @@ deck allCards =
 	W5 =  [white, 5]
 ] drawpile none
 
-deck handPlayerA = [] handA all everyone	 
-deck handPlayerB = [] handB all everyone 
+deck handPlayerA = [] handA all everyone
+deck handPlayerB = [] handB all everyone
 
-players = [A has handA, B has handB]
+players = [A has handPlayerA, B has handPlayerB]
 
 rules = [ 
 	scoring = [ each = 1 ]
@@ -69,7 +69,7 @@ rules = [
 
 gameflow = [	
 	turnorder = [A, B]
-	stage dealing = dealer [req shuffle allCards, req distribute 5 from allCards to [A, B]],
-	stage midgame = while allCards != empty all
-		[ req moveCard 1 from [allCards] to [handPlayerA, handPlayerB] ]
+	stage dealing = dealer [req shuffle allCards, req distribute 5 from allCards to [handPlayerA, handPlayerB]],
+	stage midgame = while allCards != empty turns
+		[ req takeCard from allCards to [handPlayerA, handPlayerB] ]
 ]

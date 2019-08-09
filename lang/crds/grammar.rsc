@@ -54,7 +54,7 @@ syntax Turn
 syntax Action																// Specific rules
  = @Category="Action" shuffleDeck: "shuffle" ID 							// DeckID
  | distributeCards: "distribute" VALUE "from" ID "to" "[" {ID ","}+ "]" 				// CardAmount, DeckID , List of Players
- | takeCard: "takeCard" ID ID
+ | takeCard: "takeCard" "from" ID "to" "[" {ID ","}+ "]" 
  | moveCard: "moveCard" Exp "from" "[" {ID ","}+ "]" "to" "[" {ID ","}+ "]"
  | moveToken: "moveToken" VALUE "from" ID "to" ID
  | useToken: "useToken" ID
@@ -92,7 +92,8 @@ syntax Usa
 syntax Playerlist
  = allplayers: "all"
  | dealer: "dealer"
- | turns: "turns";
+ | turns: "turns"
+ | teams: "teams";
  
 syntax Scoring
  = s: ID "=" VALUE

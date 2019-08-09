@@ -81,7 +81,7 @@ data Turn
 data Action
  = shuffleDeck(ID name)
  | distributeCards(real r, ID name, list[ID] locations)
- | takeCard(ID f, ID t)
+ | takeCard(ID f, list[ID] to)
  | moveCard(Exp e, list[ID] from, list[ID] to)
  | moveToken(real index, ID f, ID t)
  | useToken(ID object)
@@ -110,7 +110,7 @@ data Usa
  = draw() | discard() | play() | use() | ret(); 
 
 data Playerlist
- = allplayers() | dealer() | turns();
+ = allplayers() | dealer() | turns() | teams();
 
 data Scoring
  = s(str name, real r)

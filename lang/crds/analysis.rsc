@@ -32,6 +32,9 @@ data LUT
   		 map[str defName, str nodeType] types,
   		 map[str def, list[loc l] uses] refs);
 
+// TO DO
+data CRDStype 
+  = player() | team() | deck() ;
 
 /******************************************************************************
  * Main function.
@@ -133,6 +136,8 @@ LUT addRefs(CRDSII c, LUT lut)
 																	  for (use <- locations) { lut = addRef(use, lut); } }
 		case moveCard(_, list[ID] from, list[ID] to):				{ for (use <- from) { lut = addRef(use, lut); }  
 																	  for (use <- to) { lut = addRef(use, lut); } }
+		case takeCard(ID from, list[ID] to):						{ lut = addRef(from, lut);  
+																	  for (use <- to) { lut = addRef(use, lut); } }
  		case moveToken(_, ID from, ID to):						 	{ lut = addRef(from, lut);
  																	  lut = addRef(to, lut); }
 		case useToken(ID object):									{ lut = addRef(object, lut); }
@@ -214,12 +219,12 @@ void checkTypes(CRDSII c, LUT lut)
 		
 		case shuffleDeck(ID name): 									{ lut = checkRef(name, "deck", lut); }
 		case distributeCards(_, ID name, list[ID] locations): 		{ lut = checkRef(name, "deck", lut);
-																	  for (use <- locations) { lut = checkRef(use, "location", lut); } }
+																	  for (use <- locations) { lut = checkRef(use, "deck", lut); } }
  		case moveToken(_, ID from, ID to):						 	{ lut = checkRef(from, "token", lut);
  																	  lut = checkRef(to, "token", lut); }
 		case useToken(ID object):									{ lut = checkRef(object, "token", lut); }
 		case returnToken(ID object):								{ lut = checkRef(object, "token", lut); }
-		case hands(_, ID location):									{ lut = checkRef(location, "location", lut); }
+		case hands(_, ID location):									{ lut = checkRef(location, "deck", lut); }
 		case deck(_, _, ID location, _):							{ lut = checkRef(location, "location", lut); }
 		case token(_, _, ID location, _):							{ lut = checkRef(location, "location", lut); }
 		 
