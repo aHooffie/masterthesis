@@ -23,12 +23,12 @@ import String;
 
 data Decks 
  = decks(map[str name, list[str] cards] cardsets,
- 		 map[str name, list[str] visibility] view);
-// 		 map[str name, list[str] cnds] conditions)
+ 		 map[str name, list[str] visibility] view,
+ 		 map[str name, list[str] cnds] conditions);
  
 data Tokens
- = token(	map[str name, int max] max,
- 			map[str name, int current] current);
+ = tokens(map[str name, int max] max,
+ 		  map[str name, int current] current);
  
 data Players
  = players(map[str name, str handLoc] owners);
@@ -38,14 +38,17 @@ data Players
  ******************************************************************************/
 void runGame() {
 	CRDSII ast = createTree(|project://masterthesis/src/lang/samples/hanabi.crds|);
-	
+	println("BLA");
+
 	// First collect all the data.
 	Decks deck = 	decks((), (), ());
 	Players ps =	players(());
 	Tokens ts =		tokens((), ());
 	
+	println("BLA");
+	
 	visit(ast) {
-		case deck(ID name, list[Card] cards, _, list[Prop] props, list[Condition] cdns):
+		case deck(ID name, list[Card] cards, _, list[Prop] props): //):
 																	{ deck.cardsets += (name.name : getCards(cards));
 																	  deck.view += (name.name : getVis(props)); }
 																	  //deck.conditions += (name.name : getCdns(cdns)); } 
