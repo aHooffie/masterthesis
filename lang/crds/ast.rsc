@@ -119,10 +119,11 @@ data Scoring
 data Condition
  = deckCondition(Exp e, Action action)
  | stageCondition(Exp e)
- | totalTurns(Exp e);
- //| higher()
- //| lower()
- //| xhigher(real r);
+ | totalTurns(Exp e)
+ | higher()
+ | lower()
+ | xhigher(real r)
+ | color(ID name);
  
 data Exp
 = var(ID name)

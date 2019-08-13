@@ -105,10 +105,11 @@ syntax Hands
 syntax Condition // TO DO!!
  = deckCondition: "if" Exp "then" Action
  | stageCondition: "while" Exp "do"
- | totalTurns: "for" Exp "turns";
- //| higher: "higher than current"
- //| lower: "lower than current"
- //| xhigher: VALUE "higher than current";
+ | totalTurns: "for" Exp "turns"
+ | higher: "value" "=" "higher than current"
+ | lower: "value" "=" "lower than current"
+ | xhigher: "value" "=" VALUE "higher than current"
+ | color: "color" "=" ID;
  
 syntax Exp
  = var: ID

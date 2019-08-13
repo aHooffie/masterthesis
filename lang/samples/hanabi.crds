@@ -58,11 +58,11 @@ deck allCards =
 	W5 =  [white, 5]
 ] drawpile none []
 
-deck yellowPile = 	[] yellowpile 	top everyone []
-deck greenPile = 	[] greenpile 	top everyone []
-deck redPile = 		[] redpile 		top everyone []
-deck whitePile = 	[] whitepile 	top everyone []	
-deck bluePile = 	[] bluepile 	top everyone []
+deck yellowPile = 	[] yellowpile 	top everyone [value = 1 higher than current, color = yellow]
+deck greenPile = 	[] greenpile 	top everyone [value = 1 higher than current, color = green]
+deck redPile = 		[] redpile 		top everyone [value = 1 higher than current, color = red]
+deck whitePile = 	[] whitepile 	top everyone [value = 1 higher than current, color = white]	
+deck bluePile = 	[] bluepile 	top everyone [value = 1 higher than current, color = blue]
 deck discardPile = [] discardpile all everyone []
 deck handPlayerA = [] handA all hanabi []
 deck handPlayerB = [] handB all hanabi []
@@ -89,6 +89,7 @@ gameflow = [
 	stage midgame = while lives != 0 do, while allCards != empty do
 		turns 
 		[req takeCard from allCards to [handPlayerA, handPlayerB, handPlayerC],
+		 req moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile],
 		req useToken lives],
 		// [1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
 		//		giveHint [handPlayerA, handPlayerB, handPlayerC] Colour and then useToken hints,
