@@ -79,7 +79,7 @@ LUT addDefs(CRDSII c, LUT lut)
 		case card(Exp exp, _): 							{ if (var(id(str a)) := exp) { lut = addDef(a, exp@location, "card", lut);}}
 		case team(ID name, _):							{ lut = addDef(name.name, name@location, "team", lut);}
 		case players(list[Hands] hands):				{ for (player <- hands) { lut = addDef(player.player, player@location, "player", lut); } }
-		case deck(ID name, _, _, _): /*, _): */				{ lut = addDef(name.name, name@location, "deck", lut);}
+		case deck(ID name, _, _, _, _):					{ lut = addDef(name.name, name@location, "deck", lut);}
 		case game(ID name, _):							{ lut = addDef(name.name, name@location, "game", lut);}
 		case typedef(ID name, list[Exp] values):		{ lut = addDef(name.name, name@location, "typedef", lut);
 														  lut = addAttrs(name, values, lut); }
@@ -119,7 +119,7 @@ LUT addAttrs(ID name, list[Exp] exps, LUT lut) {
 LUT addRefs(CRDSII c, LUT lut)
 {	
 	visit(c) {
-		case deck(_, _, ID location, _): /* _):	*/						{ lut = addRef(location, lut); }
+		case deck(_, _, ID location, _, _):							{ lut = addRef(location, lut); }
 		case team(_, list[ID] names): 								{ for (use <- names) { lut = addRef(use, lut); } }
 		case turnorder(list[ID] names): 							{ for (use <- names) { lut = addRef(use, lut); } }
 		case communicate(list[ID] locations, Exp e):				{ for (use <- locations) { lut = addRef(use, lut); } } // TODO: Exp e
@@ -225,7 +225,7 @@ void checkTypes(CRDSII c, LUT lut)
 		case useToken(ID object):									{ lut = checkRef(object, "token", lut); }
 		case returnToken(ID object):								{ lut = checkRef(object, "token", lut); }
 		case hands(_, ID location):									{ lut = checkRef(location, "deck", lut); }
-		case deck(_, _, ID location, _): /* _): */							{ lut = checkRef(location, "location", lut); }
+		case deck(_, _, ID location, _, _): 						{ lut = checkRef(location, "location", lut); }
 		case token(_, _, ID location, _):							{ lut = checkRef(location, "location", lut); }
 		 
 		// case card(_, list[Exp] exps):								{ lut = addAttrRefs(exps, lut); }	// TO DO: Attr types?

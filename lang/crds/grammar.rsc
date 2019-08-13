@@ -22,7 +22,7 @@ start syntax CRDS
 syntax Decl
  = @Category="Decl"
    typedef: "typedef" ID "=" "[" {Exp ","}+ "]" 			// E.g. names, values, colours.
- | deck: "deck" ID "=" "[" {Card ","}* "]" ID Prop+ // "[" {Condition ","}* "]"
+ | deck: "deck" ID "=" "[" {Card ","}* "]" ID Prop+ "[" {Condition ","}* "]"
  | team: "team" ID "=" "[" {ID ","}+ "]" 					// No teams defined == FFA.
  | gameflow: "gameflow" "=" "[" Turnorder {Stage ","}+ "]"
  | players: "players" "=" "[" {Hands ","}+ "]"

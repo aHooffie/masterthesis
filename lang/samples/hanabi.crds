@@ -56,17 +56,17 @@ deck allCards =
 	W41 = [white, 4],
 	W42 = [white, 4],
 	W5 =  [white, 5]
-] drawpile none 
+] drawpile none []
 
-deck yellowPile = 	[] yellowpile 	top everyone 
-deck greenPile = 	[] greenpile 	top everyone 	
-deck redPile = 		[] redpile 		top everyone 	
-deck whitePile = 	[] whitepile 	top everyone  	
-deck bluePile = 	[] bluepile 	top everyone
-deck discardPile = [] discardpile all everyone 
-deck handPlayerA = [] handA all hanabi 
-deck handPlayerB = [] handB all hanabi 
-deck handPlayerC = [] handC all hanabi 
+deck yellowPile = 	[] yellowpile 	top everyone []
+deck greenPile = 	[] greenpile 	top everyone []
+deck redPile = 		[] redpile 		top everyone []
+deck whitePile = 	[] whitepile 	top everyone []	
+deck bluePile = 	[] bluepile 	top everyone []
+deck discardPile = [] discardpile all everyone []
+deck handPlayerA = [] handA all hanabi []
+deck handPlayerB = [] handB all hanabi []
+deck handPlayerC = [] handC all hanabi []
 
 team allPlayers = [A, B, C]
 

@@ -37,7 +37,7 @@ void foo() {
 		case playerCount(int min, int max): 	{ checkPlayers(min, max); }
 		case turnorder(list[ID] names): 		{ checkTurnorder(names); }
 		case token(_, real r, _, _):			{ checkToken(r); }
-		case deck(_, list[Card] cards, _, _): /*, _):*/	{ knownCards = countCards(knownCards, cards); }
+		case deck(_, list[Card] cards, _, _, _): { knownCards = countCards(knownCards, cards); }
 		case team(_, list[ID] names):			{ knownTeams = checkTeam(knownTeams, names); }
 		case hands(str player, _):				{ if (player notin knownPlayers) knownPlayers += player; }
 		case s(_,_):							{ scoring = true; }

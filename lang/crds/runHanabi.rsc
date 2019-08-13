@@ -20,6 +20,7 @@ import IO;
 import List;
 import Map;
 import String;
+import Type;
 
 data Decks 
  = decks(map[str name, list[str] cards] cardsets,
@@ -38,20 +39,17 @@ data Players
  ******************************************************************************/
 void runGame() {
 	CRDSII ast = createTree(|project://masterthesis/src/lang/samples/hanabi.crds|);
-	println("BLA");
 
 	// First collect all the data.
 	Decks deck = 	decks((), (), ());
 	Players ps =	players(());
 	Tokens ts =		tokens((), ());
-	
-	println("BLA");
-	
+		
 	visit(ast) {
-		case deck(ID name, list[Card] cards, _, list[Prop] props): //):
+		case deck(ID name, list[Card] cards, _, list[Prop] props, list[Condition] cdns):
 																	{ deck.cardsets += (name.name : getCards(cards));
-																	  deck.view += (name.name : getVis(props)); }
-																	  //deck.conditions += (name.name : getCdns(cdns)); } 
+																	  deck.view += (name.name : getVis(props));
+																	  deck.conditions += (name.name : getCdns(cdns)); } 
 		case token(ID name, real current, real max, _, _):			{ ts.max += (name.name : toInt(max));
 															 		  ts.current += (name.name : toInt(current)); }
 		case hands(str player, ID location):						{ ps.owners += (player : location.name); }
@@ -78,18 +76,15 @@ void runGame() {
  ******************************************************************************/
 tuple [Decks d, Tokens t] runPlayerTurn(Turn turn, Decks deck, Players ps, Tokens ts, str currentPlayer, list[Condition] cdns) {
 	println("It is <currentPlayer>\'s turn. Your cards are: <deck.cardsets[ps.owners[currentPlayer]]>");
-
-	while (true) {
-		// for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;
-		printViewableDecks(deck, ps, currentPlayer);
-		tuple [Decks d, Tokens t] objects = runActions(turn, deck, ts, ps, currentPlayer);
-		deck = objects.d;
-		ts = objects.t;
-	}
+	printViewableDecks(deck, ps, currentPlayer);
+	
+	tuple [Decks d, Tokens t] objects = runActions(turn, deck, ts, ps, currentPlayer);
+	deck = objects.d;
+	ts = objects.t;
 		
 	return <objects.d, objects.t> ;
 }
- 
+
 tuple [Decks d, Tokens t] runPlayerTurn(Turn turn, Decks deck, Players ps, Tokens ts, str currentPlayer) {
 	println("It is <currentPlayer>\'s turn. Your cards are: <deck.cardsets[ps.owners[currentPlayer]]>");
 	
@@ -261,40 +256,28 @@ list[str] getCdns(list[Condition] cdns) {
 	return allCdns;
 }	
 
-bool eval(neq(Exp e1, Exp e2), Decks ds, Tokens ts) { // only checks [deck / token ] != [value]
+bool eval(stageCondition(neq(Exp e1, Exp e2)), Decks ds, Tokens ts) { // only checks [deck / token ] != [value]
 	list[str] currentDeck = [];
 	int currentToken = 0;
 	int wantedSize = 0;
 	
-	println("1");
-	
 	if (empty() := e2) { wantedSize = 0; } 
-	else if (val(real r) := e2) { wantedSize = toInt(r); }
-	
-		println("2");
-	
+	else if (val(real r) := e2) { wantedSize = toInt(r); }	
 	
 	if (var(ID name) := e1) {
-		if (name.name in ds.cardsets) {
-			println("3");
-		
+		if (name.name in ds.cardsets) {		
 			currentDeck = ds.cardsets[name.name];
 			return size(currentDeck) != wantedSize;
-		} else {
-			println("4");
-		
+		} else {	
 			currentToken = ts.current[name.name];
 			return currentToken != wantedSize;
 		}
 	}
 }
 
-bool eval(eq(Exp e1, Exp e2), Decks deck, Tokens token) {  // only checks [deck / token] == [value]
+bool eval(stageCondition(eq(Exp e1, Exp e2)), Decks deck, Tokens ts) {  // only checks [deck / token] == [value]
 	list[str] currentDeck = [];
-	int wantedSize = 0;
-	
-	println("1");
-	
+	int wantedSize = 0;	
 	
 	if (empty() := e2) { wantedSize = 0; } 
 	else if (val(real r) := e2) { wantedSize = r; }
@@ -304,12 +287,11 @@ bool eval(eq(Exp e1, Exp e2), Decks deck, Tokens token) {  // only checks [deck 
 			currentDeck = deck.cardsets[name.name];
 			return size(currentDeck) == wantedSize;
 		} else {
-			currentToken = token.current[name.name];
+			currentToken = ts.current[name.name];
 			return currentToken == wantedSize;
 		}
 	} 	
 }
-
 
 // Check if a card can be moved from A to B. If not, move to discardPile and lose a life. 
 // Check if a token can be used.
@@ -324,9 +306,12 @@ bool eval(eq(Exp e1, Exp e2), Decks deck, Tokens token) {  // only checks [deck 
  * PARTIAL FUNCTIONS
  ******************************************************************************/
 tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps) {
-	println("TO DO: Running dealer turn with conditions");
 	
-	for (turn <- turns) deck = runDealerTurn(turn, deck, ts, ps, cdns);
+	
+	for (turn <- turns) {
+		for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;
+		deck = runDealerTurn(turn, deck, ts, ps, cdns);
+	}
 	
 	return <deck, ts >;
 }
@@ -343,13 +328,15 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(),
 	println("Running player turns with conditions");
 	for (player <- ps.owners) {
 		for (turn <- turns) {
+			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) break;
+		
 			tuple [Decks d, Tokens t] objects = runPlayerTurn(turn, deck, ps, ts, player, cdns);
 			deck = objects.d;
 			ts = objects.t;
 		}
 	}
 
- 	return <objects.d, objects.t >;
+ 	return <deck, ts>;
 }
 
 tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps) {
@@ -397,13 +384,15 @@ tuple [Decks d, Tokens t] runAction(takeCard(ID from, list[ID] to), Decks deck, 
 
 tuple [Decks d, Tokens t] runAction(useToken(ID object), Decks deck, Tokens ts, Players ps, str currentPlayer){
 	if (ts.current[object.name] == 0) { println("KAN NIET <object.name> TOKEN USEN"); return <deck, ts>; }
-	
 	ts.current[object.name] -= 1;
+	println("-- <currentPlayer> used a token <object.name>. There are now <ts.current[object.name]> left. ");
+	
 	return <deck, ts> ;
 }
 
 tuple [Decks d, Tokens t] runAction(returnToken(ID object), Decks deck, Tokens ts, Players ps, str currentPlayer){
 	if (ts.current[object.name] == ts.max[object.name]) { println("KAN NIET <object.name> TOKEN UPPEN"); return <deck, ts>; }
+	println("-- <currentPlayer> returned a token <object.name>");
 	
 	ts.current[object.name] += 1;
 	return <deck, ts> ;

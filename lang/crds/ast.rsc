@@ -51,7 +51,7 @@ data CRDSII
 
 data Decl
  = typedef	(ID name, list[Exp] values) 
- | deck		(ID name, list[Card] cards, ID location, list[Prop] props) //, list[Condition] cdns)
+ | deck		(ID name, list[Card] cards, ID location, list[Prop] props, list[Condition] cdns)
  | team		(ID name, list[ID] names)
  | gameflow (Turnorder order, list[Stage] stages)
  | players	(list[Hands] hands)
