@@ -56,14 +56,14 @@ deck allCards =
 	W41 = [white, 4],
 	W42 = [white, 4],
 	W5 =  [white, 5]
-] drawpile none
+] drawpile none 
 
-deck yellowPile = 	[] yellowpile 	top everyone
+deck yellowPile = 	[] yellowpile 	top everyone 
 deck greenPile = 	[] greenpile 	top everyone 	
 deck redPile = 		[] redpile 		top everyone 	
-deck whitePile = 	[] whitepile 	top everyone 	
+deck whitePile = 	[] whitepile 	top everyone  	
 deck bluePile = 	[] bluepile 	top everyone 	
-deck discardPile = [] discardpile all everyone 	
+deck discardPile = [] discardpile all everyone 
 deck handPlayerA = [] handA all hanabi 
 deck handPlayerB = [] handB all hanabi 
 deck handPlayerC = [] handC all hanabi 
@@ -71,11 +71,11 @@ deck handPlayerC = [] handC all hanabi
 team allPlayers = [A, B, C]
 
 tokens = [
-	lives = [3] tablelives all use return,
-	hints = [8] tablehints all use return
+	lives = [start 3, max 3] tablelives all,
+	hints = [start 8, max 8] tablehints all
 ]
 
-players = [A has handA, B has handB, C has handC]
+players = [A has handPlayerA, B has handPlayerB, C has handPlayerC]
 
 
 rules = [ 
@@ -85,17 +85,21 @@ rules = [
 gameflow = [	
 	turnorder = [A, B, C]
 	stage dealing = dealer [req shuffle allCards, req distribute 5 from allCards to [handPlayerA, handPlayerB, handPlayerC]],
-	stage midgame = while 3 > 4, while lives != 0 turns
-		[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
-				giveHint [handPlayerA, handPlayerB, handPlayerC] Colour and then useToken hints,
-				moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile]
-				and then moveCard 1 from [allCards] to [handPlayerA, handPlayerB, handPlayerC]
-			]],
+	
+	stage midgame = while lives != 0 do, while allCards != empty do
+		turns 
+		[req takeCard from allCards to [handPlayerA, handPlayerB, handPlayerC],
+		req useToken lives],
+		// [1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
+		//		giveHint [handPlayerA, handPlayerB, handPlayerC] Colour and then useToken hints,
+		//		moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile]
+		//		and then takeCard from allCards to [handPlayerA, handPlayerB, handPlayerC]
+		//	]],
 		
-	stage endgame = while lives != 0, for 1 turns turns 
-		[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
-				giveHint [handPlayerA, handPlayerB, handPlayerC] Colour and then useToken hints,
-				moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile]
-			]],	
-	stage calculateScore = dealer [req calculateScore allPlayers yellowPile greenPile redPile whitePile bluePile]
+	// stage endgame = while lives != 0, for 1 turns turns  [req useToken lives],
+		//[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
+		//		giveHint [handPlayerA, handPlayerB, handPlayerC] Colour and then useToken hints,
+		//		moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile]
+		//	]],	
+	stage calculateScore = dealer [req calculateScore /* allPlayers */ yellowPile greenPile redPile whitePile bluePile]
 ]

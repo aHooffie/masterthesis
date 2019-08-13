@@ -33,7 +33,7 @@ syntax Card
  = card: Exp "=" "[" {Exp ","}+ "]";
 
 syntax Token
- = token: ID "=" "[" VALUE "]" ID Prop+; // "[" {Condition ","}* "]";
+ = token: ID "=" "[" "start" VALUE "," "max" VALUE "]" ID Prop+; // "[" {Condition ","}* "]";
  
 syntax Rule 												// General rules.
  = playerCount: "players" "=" VALUE "to" VALUE
@@ -52,10 +52,10 @@ syntax Turn
  | choice: VALUE "of" "[" {Action ","}+ "]";
  
 syntax Action																// Specific rules
- = @Category="Action" shuffleDeck: "shuffle" ID 							// DeckID
- | distributeCards: "distribute" VALUE "from" ID "to" "[" {ID ","}+ "]" 				// CardAmount, DeckID , List of Players
- | takeCard: "takeCard" "from" ID "to" "[" {ID ","}+ "]" 
- | moveCard: "moveCard" Exp "from" "[" {ID ","}+ "]" "to" "[" {ID ","}+ "]"
+ = @Category="Action" shuffleDeck: "shuffle" ID
+ | distributeCards: "distribute" VALUE "from" ID "to" "[" {ID ","}+ "]"
+ | takeCard: "takeCard" "from" ID "to" "[" {ID ","}+ "]" 					// from drawpile
+ | moveCard: "moveCard" Exp "from" "[" {ID ","}+ "]" "to" "[" {ID ","}+ "]" // from a to b
  | moveToken: "moveToken" VALUE "from" ID "to" ID
  | useToken: "useToken" ID
  | returnToken: "returnToken" ID
@@ -104,8 +104,11 @@ syntax Hands
 
 syntax Condition // TO DO!!
  = deckCondition: "if" Exp "then" Action
- | stageCondition: "while" Exp
+ | stageCondition: "while" Exp "do"
  | totalTurns: "for" Exp "turns";
+ //| higher: "higher than current"
+ //| lower: "lower than current"
+ //| xhigher: VALUE "higher than current";
  
 syntax Exp
  = var: ID

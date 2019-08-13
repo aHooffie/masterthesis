@@ -51,7 +51,7 @@ data CRDSII
 
 data Decl
  = typedef	(ID name, list[Exp] values) 
- | deck		(ID name, list[Card] cards, ID location, list[Prop] props)//, list[Condition] cdns)
+ | deck		(ID name, list[Card] cards, ID location, list[Prop] props) //, list[Condition] cdns)
  | team		(ID name, list[ID] names)
  | gameflow (Turnorder order, list[Stage] stages)
  | players	(list[Hands] hands)
@@ -62,7 +62,7 @@ data Card
  = card(Exp name, list[Exp] attrs);
 
 data Token 
- = token(ID name, real r, ID location, list[Prop] props);//, list[Condition] cdns); 
+ = token(ID name, real current, real max, ID location, list[Prop] props);//, list[Condition] cdns); 
  
 data Rule 
  = playerCount(int min, int max)
@@ -120,6 +120,9 @@ data Condition
  = deckCondition(Exp e, Action action)
  | stageCondition(Exp e)
  | totalTurns(Exp e);
+ //| higher()
+ //| lower()
+ //| xhigher(real r);
  
 data Exp
 = var(ID name)
