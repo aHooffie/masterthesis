@@ -10,18 +10,23 @@
 
 /*
  * to do 
- * Check if a token can be used.
- * Check if a token can be returned.
+ * Fix hints
  * Check if a hint can be given (color / number available).
- * Use life token when error play 
  * Make x of (choice) action
- *
+ * Filter choice actions
+ * REMOVE PLAYER VISIBILITY 
+ * correct move to discardpile
+ * while loop conditions
  *
  * later
+ * Check branching 
  * generalize / add missing data types
  * remove hardcoded things
  * cleanup code 
+ * Pretty print
  * 
+ * Check if a token can be used. - CHECK IF WORKS
+ * Check if a token can be returned. - CHECK IF WORKS
  */
 
 
@@ -37,6 +42,7 @@ import util::Prompt;
 import IO;
 import List;
 import Map;
+import Set;
 import String;
 
 data Decks 
@@ -73,9 +79,6 @@ void runGame() {
 		case hands(str player, ID location):						{ ps.owners += (player : location.name); }
 		case card(var(ID name), list[Exp] attrs):					{ deck.cards += ( name.name : getAttrs(attrs)); }
 	}
-	
-	println(deck.conditions);
-	println(deck.cards);
 	println("----------- Starting game -----------"); 
 	
 	// Loop over stages to run the game.-
@@ -116,19 +119,24 @@ tuple [Decks d, Tokens t] runPlayerTurn(Turn turn, Decks deck, Players ps, Token
 /******************************************************************************
  * Player actions.
  ******************************************************************************/
-Decks moveCard(Decks deck, Exp e, list[str] f, list[str] t) { 
-	println("-- player is moving a card");
+ // Move card from A to B.
+tuple [Decks d, Tokens t] moveCard(Decks deck, Tokens ts, Exp e, list[str] f, list[str] t) { 
 	str movedCard;	
-	str from = f[0]; // CORRECT PILE 
+	str from = f[0]; // = CORRECT PILE 
 	
+	// Get the correct card to move.
 	if (val(real r) := e) { 
-		movedCard = deck.cardsets[from][r]; // TO REMOVE CARD
+		movedCard = deck.cardsets[from][r];
 	} else if (l(LIST l) := e && l(real min, real max) := l) { 
 		do {
 			movedCard = prompt("Please pick a card to move (<deck.cardsets[from]>)");
 		} while (movedCard notin deck.cardsets[from]);		
 	}
 	
+	// TO DO: CORRECT MOVE TO DISCARD PILE 
+	if (t == ["discardPile"]) { println("TO DO: CARD TO DISCARDPILE"); return <deck, ts>; }
+
+	// Check if card can be played. Else, move card to discardpile and lose life.
 	if (checkPlay(movedCard, t, deck) == true) {
 		str correctPile = checkPiles(deck.cards[movedCard], t, deck);
 		deck.cardsets[from] = delete(deck.cardsets[from], indexOf(deck.cardsets[from], movedCard)); // remove card
@@ -138,17 +146,15 @@ Decks moveCard(Decks deck, Exp e, list[str] f, list[str] t) {
 		deck.cardsets[from] = delete(deck.cardsets[from], indexOf(deck.cardsets[from], movedCard)); // remove card
 		deck.cardsets["discardPile"] += movedCard;
 		println("--------- player moved card <movedCard> from <from> to DISCARD PILE");
-		
-		// TO DO: USE LIFE TOKEN 	
+		ts.current["lives"] -= 1; // Check if game over? 
+		println("LIVES LEFT: <ts.current["lives"]>");
+		println("--------- player lost a life.");
 	}
 			
-	return deck;
+	return <deck, ts>;
 }
 
-Decks errorPlay(Decks deck, str card) {
-	
-}
-
+// Take a card.
 Decks takeCard(Decks deck, str from, list[str] to) {
 	for (int i <- [0 .. size(to)]) {
 		tuple [str abc, list[str] newFrom] t = pop(deck.cardsets[from]);
@@ -158,6 +164,23 @@ Decks takeCard(Decks deck, str from, list[str] to) {
 	}
 	
 	return deck;
+}
+
+// Use and return tokens.
+tuple [Decks d, Tokens t] runAction(useToken(ID object), Decks deck, Tokens ts, Players ps, str currentPlayer){
+	if (ts.current[object.name] == 0) { println("CAN NOT USE TOKEN <object.name>. THERE ARE 0."); return <deck, ts>; }
+
+	ts.current[object.name] -= 1;
+	println("-- <currentPlayer> used a token <object.name>. There are now <ts.current[object.name]> left. ");
+	return <deck, ts> ;
+}
+
+tuple [Decks d, Tokens t] runAction(returnToken(ID object), Decks deck, Tokens ts, Players ps, str currentPlayer){
+	if (ts.current[object.name] == ts.max[object.name]) { println("CAN NOT RETURN TOKEN <object.name>, ALREADY MAX"); return <deck, ts>; }
+
+	println("-- <currentPlayer> returned a token <object.name>");
+	ts.current[object.name] += 1;
+	return <deck, ts> ;
 }
 
 /******************************************************************************
@@ -177,7 +200,7 @@ Decks runDealerTurn(Turn turn, Decks deck, Tokens ts, Players ps) {
 
 Decks runDealerTurn(Turn turn, Decks deck, Tokens ts, Players ps, list[Condition] cdns) {
 	while (true) {	
-		for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;
+		for (cdn <- cdns) if (eval(cdn, deck, ts) == false) { println("EVAL FAILED IN RUNDEALER ");return <deck, ts>;}
 		
 		if (req(shuffleDeck(ID name)) := turn)
 			deck.cardsets[name.name] = shuffleDeck(deck.cardsets[name.name]);
@@ -330,6 +353,9 @@ bool eval(stageCondition(neq(Exp e1, Exp e2)), Decks ds, Tokens ts) { // only ch
 			return size(currentDeck) != wantedSize;
 		} else {	
 			currentToken = ts.current[name.name];
+			println("Checking if the following is true");
+			println("<currentToken> != <wantedSize>");
+			println(currentToken != wantedSize);
 			return currentToken != wantedSize;
 		}
 	}
@@ -414,7 +440,7 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(),
 	for (player <- ps.owners) {
 		println("-------It is player <player>\'s turn");
 		for (turn <- turns) {
-			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) break;
+			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;
 		
 			tuple [Decks d, Tokens t] objects = runPlayerTurn(turn, deck, ps, ts, player, cdns);
 			deck = objects.d;
@@ -459,8 +485,10 @@ tuple [Decks d, Tokens t] runActions(choice(real r, list[Action] action), Decks 
 }
 
 tuple [Decks d, Tokens t] runAction(moveCard(Exp e, list[ID] from, list[ID] to), Decks deck, Tokens ts, Players ps, str currentPlayer) {
-	deck = moveCard(deck, e, [f.name | f <- from, ps.owners[currentPlayer] == f.name || "allCards" == f.name], [t.name | t <- to]);
-	return <deck, ts> ;
+	tuple [Decks d, Tokens t] result = moveCard(deck, ts, e, 
+									   [f.name | f <- from, ps.owners[currentPlayer] == f.name || "allCards" == f.name],
+									   [t.name | t <- to]);
+	return result;
 }
 
 tuple [Decks d, Tokens t] runAction(takeCard(ID from, list[ID] to), Decks deck, Tokens ts, Players ps, str currentPlayer) {
@@ -468,20 +496,71 @@ tuple [Decks d, Tokens t] runAction(takeCard(ID from, list[ID] to), Decks deck, 
 	return <deck, ts> ;
 }
 
-tuple [Decks d, Tokens t] runAction(useToken(ID object), Decks deck, Tokens ts, Players ps, str currentPlayer){
-	if (ts.current[object.name] == 0) { println("KAN NIET <object.name> TOKEN USEN"); return <deck, ts>; }
-	ts.current[object.name] -= 1;
-	println("-- <currentPlayer> used a token <object.name>. There are now <ts.current[object.name]> left. ");
+tuple [Decks d, Tokens t] runAction(communicate(list[ID] locations, Exp e), Decks deck, Tokens ts, Players ps, str currentPlayer) {
+	println("COMMUNICATE");
 	
-	return <deck, ts> ;
+	list[str] names = [ player | player <- ps.owners.name, player != currentPlayer];
+	println(names);
+	
+	str target = "";
+	do {
+		target = prompt("Please pick a player\'s hand to give a hint to (<names>)");
+	} while (target notin names);			
+	
+	str cat = "";
+	// hardcoded - to fix
+	list[str] opts = ["red", "white", "green", "yellow", "blue", "1", "2", "3", "4", "5"];
+	
+	do {
+		cat =  prompt("Player <target>\'s hand consists of the following hand: \n <deck.cardsets[ps.owners[target]]>. Give hint about?");
+	} while (cat notin opts);
+	
+	
+	// checkPlay. If false, reRun action 
+	if (isEmpty(getLocs(deck.cardsets[ps.owners[target]], cat))) {
+		runAction(communicate(locations, e), deck, ts, ps, currentPlayer);
+	} else { giveHint(deck, ps, target, cat) };
+	
+	return <deck, ts >;
 }
 
-tuple [Decks d, Tokens t] runAction(returnToken(ID object), Decks deck, Tokens ts, Players ps, str currentPlayer){
-	if (ts.current[object.name] == ts.max[object.name]) { println("KAN NIET <object.name> TOKEN UPPEN"); return <deck, ts>; }
-	println("-- <currentPlayer> returned a token <object.name>");
+// Fix Hardcoded 
+void giveHint(Decks deck, Players ps, str target, str cat) {
+	list[str] correctHand = deck.cardsets[ps.owners[target]];
 	
-	ts.current[object.name] += 1;
-	return <deck, ts> ;
+	list[int] locs = getLocs(correctHand, cat);	
+	println("<target>\'s cards at position(s) <locs> are <cat>");	
+
+	return;
+}
+
+list[int] getLocs(list[str] cards, str cat) {
+	list[int] locs = [];
+	for (card <- cards) {
+		switch (cat){
+			case "white": 	if (startsWith(card, "W")) {println("FOUND WHITE");locs += indexOf(cards, card) + 1; }
+			case "green": 	if (startsWith(card, "G")) {println("FOUND GREEN"); locs += indexOf(cards, card) + 1; }
+			case "yellow":	if (startsWith(card, "Y")) locs += indexOf(cards, card) + 1;
+			case "blue": 	if (startsWith(card, "B")) locs += indexOf(cards, card) + 1;
+			case "red": 	if (startsWith(card, "R")) locs += indexOf(cards, card) + 1;
+			case "1": if (charAt(card, 1) == "1") locs += indexOf(cards, card) + 1;
+			case "2": if (charAt(card, 1) == "2") locs += indexOf(cards, card + 1);
+			case "3": if (charAt(card, 1) == "3") locs += indexOf(cards, card) + 1;
+			case "4": if (charAt(card, 1) == "4") locs += indexOf(cards, card) + 1;
+			case "5": if (charAt(card, 1) == "5") locs += indexOf(cards, card) + 1;
+		}
+	}
+	println(locs);
+	return locs;
+}
+
+tuple [Decks d, Tokens t] runAction(sequence(Action first, Action second), Decks deck, Tokens ts, Players ps, str currentPlayer) {
+	println("SEQUENCE");
+	tuple [Decks d, Tokens t] result = runAction(first, deck, ts, ps, currentPlayer);
+	deck = result.d;
+	ts = result.t;
+	result = runAction(second, deck, ts, ps, currentPlayer);
+	return <result.d, result.t >;
 }
 /******************************************************************************
  * TO DO: All players can go at the same time && TEAM turn.

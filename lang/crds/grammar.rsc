@@ -60,7 +60,7 @@ syntax Action																// Specific rules
  | useToken: "useToken" ID
  | returnToken: "returnToken" ID
  | obtainKnowledge: "getInfo" ID
- | communicate: "giveHint" "[" {ID ","}* "]" Exp
+ | communicate: "giveHint" "[" {ID ","}* "]" Exp // list of locs, value
  | changeTurnorder: "changeTurns" Turnorder
  | calculateScore: "calculateScore" ID+
  | endGame: "endGame"
