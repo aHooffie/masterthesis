@@ -10,13 +10,12 @@
 
 /*
  * to do 
- * Fix hints
- * Check if a hint can be given (color / number available).
  * Make x of (choice) action
  * Filter choice actions
- * REMOVE PLAYER VISIBILITY 
+ 
  * correct move to discardpile
  * while loop conditions
+  * REMOVE PLAYER VISIBILITY 
  *
  * later
  * Check branching 
@@ -81,7 +80,7 @@ void runGame() {
 	}
 	println("----------- Starting game -----------"); 
 	
-	// Loop over stages to run the game.-
+	// Loop over stages to run the game.
 	visit(ast) {
 		case gameflow(_, list[Stage] stages): 			{ for (stage <- stages) { 
 															tuple [Decks d, Tokens t] objects = runStage(stage, deck, ts, ps);
@@ -259,18 +258,39 @@ void calculateScore(list[str] decks, Decks ds) {
 
 void printViewableDecks(Decks d, Players ps, str currentPlayer) {
 	for (deck <- d.cardsets) {
-		if ("everyone" in d.view[deck]) {
-			if ("top" in d.view[deck]) {
-				if (!isEmpty(d.cardsets[deck])) println("<deck> has the following cards on top: <last(d.cardsets[deck])>.");
-				else println("<deck> has no cards.");
-			} else if ("all" in d.view[deck]) {
-				if (!isEmpty(d.cardsets[deck])) println("<deck> consists currently of the following cards: <d.cardsets[deck]>.");
-				else println("<deck> has no cards.");
+		if (!contains(deck, "hand")) {
+			if ("everyone" in d.view[deck]) {
+				if ("top" in d.view[deck]) {
+					if (!isEmpty(d.cardsets[deck])) println("<deck> has the following cards on top: <last(d.cardsets[deck])>.");
+					else println("<deck> has no cards.");
+				} else if ("all" in d.view[deck]) {
+					if (!isEmpty(d.cardsets[deck])) println("<deck> consists currently of the following cards: <d.cardsets[deck]>.");
+					else println("<deck> has no cards.");
+				}
+			} else if ("hanabi" in d.view[deck]) {
+				if (ps.owners[currentPlayer] != deck) {
+					if (!isEmpty(d.cardsets[deck])) println("<deck> has the following cards: <d.cardsets[deck]>.");
+					else println("<deck> has no cards.");
+				}
 			}
-		} else if ("hanabi" in d.view[deck]) {
-			if (ps.owners[currentPlayer] != deck) {
-				if (!isEmpty(d.cardsets[deck])) println("<deck> has the following cards: <d.cardsets[deck]>.");
-				else println("<deck> has no cards.");
+		}
+	}
+	
+	for (deck <- d.cardsets) {
+		if (contains(deck, "hand")) {
+			if ("everyone" in d.view[deck]) {
+				if ("top" in d.view[deck]) {
+					if (!isEmpty(d.cardsets[deck])) println("<deck> has the following cards on top: <last(d.cardsets[deck])>.");
+					else println("<deck> has no cards.");
+				} else if ("all" in d.view[deck]) {
+					if (!isEmpty(d.cardsets[deck])) println("<deck> consists currently of the following cards: <d.cardsets[deck]>.");
+					else println("<deck> has no cards.");
+				}
+			} else if ("hanabi" in d.view[deck]) {
+				if (ps.owners[currentPlayer] != deck) {
+					if (!isEmpty(d.cardsets[deck])) println("<deck> has the following cards: <d.cardsets[deck]>.");
+					else println("<deck> has no cards.");
+				}
 			}
 		}
 	}
@@ -353,9 +373,6 @@ bool eval(stageCondition(neq(Exp e1, Exp e2)), Decks ds, Tokens ts) { // only ch
 			return size(currentDeck) != wantedSize;
 		} else {	
 			currentToken = ts.current[name.name];
-			println("Checking if the following is true");
-			println("<currentToken> != <wantedSize>");
-			println(currentToken != wantedSize);
 			return currentToken != wantedSize;
 		}
 	}
@@ -427,18 +444,18 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, dealer()
 		deck = runDealerTurn(turn, deck, ts, ps, cdns);
 	}
 	
-	return <deck, ts >;
+	return <deck, ts>;
 }
 
 tuple [Decks d, Tokens t] runStage(basic(ID name, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps) {
 	for (turn <- turns) deck = runDealerTurn(turn, deck, ts, ps);
 	
-	return <deck, ts >;
+	return <deck, ts>;
 }
 
 tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps) {
 	for (player <- ps.owners) {
-		println("-------It is player <player>\'s turn");
+		println("------- It is player <player>\'s turn -------");
 		for (turn <- turns) {
 			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;
 		
@@ -453,10 +470,10 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(),
 
 tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps) {
 	println("Running player turns without conditions");
-	tuple [Decks d, Tokens t] objects = < deck, ts >;
+	tuple [Decks d, Tokens t] objects = < deck, ts>;
 	
 	for (player <- ps.owners) {
-		println("-------It is player <player>\'s turn");	
+		println("------- It is player <player>\'s turn -------");	
 		for (turn <- turns) {
 			tuple [Decks d, Tokens t] objects = runPlayerTurn(turn, deck, ps, ts, player);
 			deck = objects.d;
@@ -464,7 +481,7 @@ tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), De
 		}
 	}
 
- 	return <objects.d, objects.t >;
+ 	return <objects.d, objects.t>;
 }
 
 tuple [Decks d, Tokens t]runActions(opt(Action action), Decks deck, Tokens ts, Players ps, str currentPlayer) {
@@ -475,7 +492,7 @@ tuple [Decks d, Tokens t]runActions(opt(Action action), Decks deck, Tokens ts, P
 tuple [Decks d, Tokens t] runActions(req(Action action), Decks deck, Tokens ts, Players ps, str currentPlayer) {
 	tuple [Decks d, Tokens t] objects = runAction(action, deck, ts, ps, currentPlayer);
 	
-	return <objects.d, objects.t >;
+	return <objects.d, objects.t>;
 	
 }
 
@@ -496,11 +513,8 @@ tuple [Decks d, Tokens t] runAction(takeCard(ID from, list[ID] to), Decks deck, 
 	return <deck, ts> ;
 }
 
-tuple [Decks d, Tokens t] runAction(communicate(list[ID] locations, Exp e), Decks deck, Tokens ts, Players ps, str currentPlayer) {
-	println("COMMUNICATE");
-	
+tuple [Decks d, Tokens t] runAction(communicate(list[ID] locations, Exp e), Decks deck, Tokens ts, Players ps, str currentPlayer) {	
 	list[str] names = [ player | player <- ps.owners.name, player != currentPlayer];
-	println(names);
 	
 	str target = "";
 	do {
@@ -517,50 +531,51 @@ tuple [Decks d, Tokens t] runAction(communicate(list[ID] locations, Exp e), Deck
 	
 	
 	// checkPlay. If false, reRun action 
-	if (isEmpty(getLocs(deck.cardsets[ps.owners[target]], cat))) {
+	if (isEmpty(blabla(deck.cardsets[ps.owners[target]], cat))) {
+		println("This is not a viable option. Please retry to give a hint");
 		runAction(communicate(locations, e), deck, ts, ps, currentPlayer);
-	} else { giveHint(deck, ps, target, cat) };
-	
-	return <deck, ts >;
+	} else
+		giveHint(deck, ps, target, cat);
+		
+	return <deck, ts>;
 }
 
 // Fix Hardcoded 
 void giveHint(Decks deck, Players ps, str target, str cat) {
-	list[str] correctHand = deck.cardsets[ps.owners[target]];
+	list[int] l =  blabla(deck.cardsets[ps.owners[target]], cat);	
 	
-	list[int] locs = getLocs(correctHand, cat);	
-	println("<target>\'s cards at position(s) <locs> are <cat>");	
+	println("<target>\'s cards at position(s) <l> have the attribute \"<cat>\"");	
 
 	return;
 }
 
-list[int] getLocs(list[str] cards, str cat) {
-	list[int] locs = [];
+list[int] blabla(list[str] cards, str cat) {
+	list[int] l = [];	
 	for (card <- cards) {
 		switch (cat){
-			case "white": 	if (startsWith(card, "W")) {println("FOUND WHITE");locs += indexOf(cards, card) + 1; }
-			case "green": 	if (startsWith(card, "G")) {println("FOUND GREEN"); locs += indexOf(cards, card) + 1; }
-			case "yellow":	if (startsWith(card, "Y")) locs += indexOf(cards, card) + 1;
-			case "blue": 	if (startsWith(card, "B")) locs += indexOf(cards, card) + 1;
-			case "red": 	if (startsWith(card, "R")) locs += indexOf(cards, card) + 1;
-			case "1": if (charAt(card, 1) == "1") locs += indexOf(cards, card) + 1;
-			case "2": if (charAt(card, 1) == "2") locs += indexOf(cards, card + 1);
-			case "3": if (charAt(card, 1) == "3") locs += indexOf(cards, card) + 1;
-			case "4": if (charAt(card, 1) == "4") locs += indexOf(cards, card) + 1;
-			case "5": if (charAt(card, 1) == "5") locs += indexOf(cards, card) + 1;
+			case "white": 	if (startsWith(card, "W")) l += indexOf(cards, card) + 1;
+			case "green": 	if (startsWith(card, "G")) l += indexOf(cards, card) + 1; 
+			case "yellow":	if (startsWith(card, "Y")) l += indexOf(cards, card) + 1;
+			case "blue": 	if (startsWith(card, "B")) l += indexOf(cards, card) + 1;
+			case "red": 	if (startsWith(card, "R")) l += indexOf(cards, card) + 1;
+			case "1": if (stringChar(charAt(card, 1)) == "1") l += indexOf(cards, card) + 1;
+			case "2": if (stringChar(charAt(card, 1)) == "2") l += indexOf(cards, card + 1);
+			case "3": if (stringChar(charAt(card, 1)) == "3") l += indexOf(cards, card) + 1;
+			case "4": if (stringChar(charAt(card, 1)) == "4") l += indexOf(cards, card) + 1;
+			case "5": if (stringChar(charAt(card, 1)) == "5") l += indexOf(cards, card) + 1;
 		}
 	}
-	println(locs);
-	return locs;
+	
+	return l;
 }
 
 tuple [Decks d, Tokens t] runAction(sequence(Action first, Action second), Decks deck, Tokens ts, Players ps, str currentPlayer) {
-	println("SEQUENCE");
 	tuple [Decks d, Tokens t] result = runAction(first, deck, ts, ps, currentPlayer);
 	deck = result.d;
 	ts = result.t;
+	
 	result = runAction(second, deck, ts, ps, currentPlayer);
-	return <result.d, result.t >;
+	return <result.d, result.t>;
 }
 /******************************************************************************
  * TO DO: All players can go at the same time && TEAM turn.
