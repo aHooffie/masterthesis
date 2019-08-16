@@ -76,7 +76,7 @@ data Turnorder
  = turnorder(list[ID] names); 
  
 data Turn
- = opt(Action action) | req(Action action) | choice(real r, list[Action] Action);
+ = opt(Action action) | req(Action action) | choice(real r, list[Action] action);
 
 data Action
  = shuffleDeck(ID name)

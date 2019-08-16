@@ -87,27 +87,21 @@ gameflow = [
 	stage dealing = dealer [req shuffle allCards, req distribute 5 from allCards to [handPlayerA, handPlayerB, handPlayerC]],
 	
 	stage midgame = while lives != 0 do, while allCards != empty do
-		turns 
-		[req takeCard from allCards to [handPlayerA, handPlayerB, handPlayerC]],		
-		
-	//	[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
-	//	 
-	//			 giveHint [handPlayerA, handPlayerB, handPlayerC] Colour and then useToken hints,
-	//			
-	//			moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile]
-	//			and then takeCard from allCards to [handPlayerA, handPlayerB, handPlayerC],
-	//			
-	//	 		moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [discardPile]
-	//			and then takeCard from allCards to [handPlayerA, handPlayerB, handPlayerC]
-	//			and then returnToken hints
-	//		]],
+		turns		
+		[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
+			
+				moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile]
+				and then takeCard from allCards to [handPlayerA, handPlayerB, handPlayerC],
+				
+		 		moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [discardPile]
+				and then takeCard from allCards to [handPlayerA, handPlayerB, handPlayerC]
+			and then returnToken hints
+			]],
 		
 	// stage endgame = while lives != 0, for 1 turns
 	// 	turns
 	//	[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
-	//	
-	//			giveHint [handPlayerA, handPlayerB, handPlayerC] Colour and then useToken hints,
-	//			
+
 	//			moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile],
 	//			
 	//			moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [discardPile]
