@@ -1,0 +1,217 @@
+game Hanabi
+
+typedef Value = [1, 2, 3, 4, 5]
+typedef Colour = [blue, green, red, white, yellow]
+typedef location = [bluepile, greenpile, redpile, whitepile, yellowpile, discardpile, drawpile, handA, handB, handC, tablelives, tablehints]
+
+deck allCards = [
+	G21 = [green, 2],
+W31 = [white, 3],
+R21 = [red, 2],
+G11 = [green, 1],
+B21 = [blue, 2],
+B42 = [blue, 4],
+B5  = [blue, 5],
+R12 = [red, 1],
+W12 = [white, 1],
+R13 = [red, 1],
+Y41 = [yellow, 4],
+B22 = [blue, 2],
+G5  = [green, 5],
+Y22 = [yellow, 2],
+W32 = [white, 3],
+Y11 = [yellow, 1],
+G42 = [green, 4],
+R5  = [red, 5],
+Y12 = [yellow, 1],
+Y13 = [yellow, 1],
+G12 = [green, 1],
+W13 = [white, 1],
+B32 = [blue, 3],
+G13 = [green, 1],
+R32 = [red, 3],
+W42 = [white, 4],
+Y5  = [yellow, 5],
+W5  = [white, 5],
+B13 = [blue, 1],
+R42 = [red, 4],
+Y42 = [yellow, 4],
+Y32 = [yellow, 3],
+G22 = [green, 2],
+R22 = [red, 2]
+] drawpile none []
+
+deck yellowPile = 	[] yellowpile 	top everyone [value = 1 higher than current, color = yellow]
+deck greenPile = 	[] greenpile 	top everyone [value = 1 higher than current, color = green]
+deck redPile = 		[] redpile 		top everyone [value = 1 higher than current, color = red]
+deck whitePile = 	[] whitepile 	top everyone [value = 1 higher than current, color = white]	
+deck bluePile = 	[] bluepile 	top everyone [value = 1 higher than current, color = blue]
+deck discardPile = [] discardpile all everyone []
+deck stijn = [B12, Y21, W22, W21] handS all hanabi []
+deck maria = [G32, B41, B31, W11]  handM all hanabi []
+deck chelsea = [R41, R31, W41, G41] handC all hanabi []
+deck lieuwe = [G31, R11, Y31, B11] handL all hanabi []
+
+
+team allPlayers = [S, M, C]
+
+tokens = [
+	lives = [start 3, max 3] tablelives all,
+	hints = [start 8, max 8] tablehints all
+]
+
+players = [S has stijn, M has maria, C has Chelsea]
+
+rules = [ 
+	scoring = [ each = 1 ]
+]
+
+
+S hints 1 to L (2)
+
+L plays B1 
+L picks up G2
+
+C hints 1 to M
+
+M plays W1
+M picks up W3
+
+S discards W2
+S picks up R2
+
+L plays R1
+L picks up G1
+
+C gives hint White to S
+
+M gives hint 1 to L
+
+S plays W2
+S picks up B2
+
+L plays G1
+L picks up B4
+
+C discards G4 (could hint W3 to M)
+
+M hints 2 to Stijn (3)
+
+S plays B2 (newly picked up)
+S picks up R1
+
+L hints blue to M (could also hints 3s to Maria, 2 were playable – not dependable on C)
+
+C discards W4
+C picks up W1
+M plays B4 – LOSES LIFE 
+M picks up R1
+
+S plays R2
+S picks up Y4
+
+CHELSEA: I USED TO GIVEH INTS ABOUT WHAT TO DISCASRD AND THAT DID NOT PLEASE S AND M
+
+L gives hint 3 to C (red 3 at discard)
+
+C plays R3
+C picks up B2
+
+M gives hint 2 to L (while she could play blue 3, so that Stijn would know that he should not play his 3rd 2)
+
+S gives hint Red to Chelsea (R4)
+
+L plays G2
+L picks up G5
+
+C gives hint of 3s to Maria (3, 3 playable)
+
+M plays B3
+M picks up Y2
+
+S discards B1 
+S picks up W3
+
+L hints 5 to Chelsea (discard)
+
+C plays R4
+C picks up Y1
+
+M plays W3
+M picks up G3
+
+S gives hint B to C 
+ L plays B4 
+L picks up R5
+
+C discards W1
+C picks up Y1
+
+M gives hint R to L
+S discards R1
+S picks up Y1
+
+L plays R5 (could have given hint about 1s to Chelsea, decided not to)
+L picks G1
+
+C hints 1 to S (did not let Maria do it)
+
+M discards R1
+M picks up W1
+
+S plays Y1
+S picks up B3
+
+L discards Y3
+L picks up G1
+
+C discards B2
+C picks up R3
+
+Maria gives ihnt Y to Stijn – Can already play cards for a while, decides not to)
+
+S plays Y2
+S picks up W4
+
+L discards G3 (could have been played)
+L picks up Y5
+
+C gives hint Green to Maria
+ M plays G3
+M picks up W5 – CHELSEA CAN NOW KNOW WHICH 5 CHE HAS
+
+S gives hint 5s to L
+
+L  gives hint to C about 5
+
+C plays B5 C picks up B1
+
+M discards Y2
+M picks up R4
+
+S gives hint Y to L (about 5s in the future)
+L discards G1
+L picks up Y4
+
+C gives hint 4 to M – (G4, R4, G4 at disc)
+M plays G4
+M picks up Y3
+
+S discards Y4 (did not remember it) == “this was dumb”
+S picks up G2
+
+L plays G5
+L picks up R2 == LAST CARD 
+
+C: I have nothing useful, I can better play a random card
+C could hint M about Y3
+
+C gives hint Y to M
+M plays Y3
+
+S hints 4 to L
+L plays Y4
+
+[ endscore: 22 ]
+
+

@@ -83,6 +83,7 @@ void runGame() {
 tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps) {
 	while (true) {
 		for (player <- ps.owners) {
+			println(ps.owners);
 			// Pretty print information.
 			println("------- It is player <player>\'s turn -------");
 			printViewableDecks(deck, ps, player);
@@ -168,7 +169,6 @@ tuple [Decks d, Tokens t] runAction(returnToken(ID object), Decks deck, Tokens t
  // TO DO: LESS HARDCODED.
 tuple [Decks d, Tokens t] runAction(communicate(list[ID] locations, Exp e), Decks deck, Tokens ts, Players ps, str currentPlayer) {	
 	list[str] names = [ player | player <- ps.owners.name, player != currentPlayer];
-	println("BLA");
 	println(stringify(names));
 	str target = "";
 	do {
@@ -214,7 +214,6 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, dealer()
 // Run dealer turn with no conditions
 tuple [Decks d, Tokens t] runStage(basic(ID name, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps) {
 	for (turn <- turns) {
-		println(turn);
 		if (checkPlay(turn, ts, deck) == false) {
 			println("Cannot run current turn. Please take a look at stage <name> and fix this issue.");
 			return <deck, ts>;
@@ -288,17 +287,6 @@ tuple [Decks d, Tokens t] runAction(choice(real r, list[Action] actions), Decks 
 	return runAction(actions[n - 1], deck, ts, ps, currentPlayer);
 }
 
-//list[str] getActions(list[Action] actions) {
-//	list[str] options = [];
-//		
-//	for (a <- actions) {
-//		options += addOption(a);
-//	}
-//
-//	list[str] options = [ addOption(a) | a <- actions ];
-//	return options;	
-//}	
-
  // Move a card from A to B.
 tuple [Decks d, Tokens t] runAction(moveCard(Exp e, list[ID] fromList, list[ID] to), Decks deck, Tokens ts, Players ps, str currentPlayer) {
 	str from = [f.name | f <- fromList, ps.owners[currentPlayer] == f.name || "allCards" == f.name][0];
@@ -314,7 +302,7 @@ tuple [Decks d, Tokens t] runAction(moveCard(Exp e, list[ID] fromList, list[ID] 
 			indexCard = promptForInt("Please pick a card to move from your hand [1, 2, 3, 4, 5]");
 			movedCard = deck.cardsets[from][toInt(indexCard)];
 		} while (indexCard > handSize || indexCard < 1); // HANABI SPECIFIC!! 
-	}
+	} else if (var(id(str name)) := e) movedCard = name;
 		
 	// DISCARDPILE is special case. 
 	if (t == ["discardPile"]) <deck, ts> = moveCardToDiscard(movedCard, from, deck, ts, ps, currentPlayer);

@@ -1,0 +1,149 @@
+game Hanabi
+
+typedef Value = [1, 2, 3, 4, 5]
+typedef Colour = [blue, green, red, white, yellow]
+typedef location = [bluepile, greenpile, redpile, whitepile, yellowpile, discardpile, drawpile, handA, handB, handC, tablelives, tablehints]
+
+deck allCards = [
+R41 = [red, 4],
+G12 = [green, 1],
+B31 = [blue, 3],
+Y5  = [yellow, 5],
+B32 = [blue, 3],
+W31 = [white, 3],
+Y12 = [yellow, 1],
+W32 = [white, 3],
+Y41 = [yellow, 4],
+Y42 = [yellow, 4],
+Y13 = [yellow, 1],
+B41 = [blue, 4],
+G21 = [green, 2],
+Y31 = [yellow, 3],
+W42 = [white, 4],
+W5  = [white, 5],
+B12 = [blue, 1],
+G5 = [green, 5],
+G13 = [green, 1],
+W13 = [white, 1],
+R12 = [red, 1],
+	W21 = [white, 2],
+	B13 = [blue, 1],
+	G31 = [green, 3],
+	W22 = [white, 2],
+	G32 = [green, 3],
+	G22 = [green, 2],
+	R31 = [red, 3],
+	B41 = [blue, 4],
+R31 = [red, 3],
+B42 = [blue, 4],
+R13 = [red, 1],
+R32 = [red, 3],
+B5  = [blue, 5],
+R13 = [red, 1]
+Y32 = [yellow, 3]
+
+] drawpile none []
+
+deck yellowPile = 	[] yellowpile 	top everyone [value = 1 higher than current, color = yellow]
+deck greenPile = 	[] greenpile 	top everyone [value = 1 higher than current, color = green]
+deck redPile = 		[] redpile 		top everyone [value = 1 higher than current, color = red]
+deck whitePile = 	[] whitepile 	top everyone [value = 1 higher than current, color = white]	
+deck bluePile = 	[] bluepile 	top everyone [value = 1 higher than current, color = blue]
+deck discardPile = [] discardpile all everyone []
+deck stijn = [B11, G42, W41, Y11] handS all hanabi []
+deck maria = [G41, Y21, Y22, W11]  handM all hanabi []
+deck chelsea = [ G11, R21, R41, R22] handC all hanabi []
+deck lieuwe = [R5, B21, W12, B22] handL all hanabi []
+
+
+team allPlayers = [C, M, S, L]
+
+tokens = [
+	lives = [start 3, max 3] tablelives all,
+	hints = [start 8, max 8] tablehints all
+]
+
+players = [S has stijn, M has maria, C has chelsea, L has lieuwe]
+
+rules = [ 
+	scoring = [ each = 1 ]
+]
+
+
+
+C hints 1 to M 
+
+M hints 1 to S (has 2)
+
+S plays B1
+S picks up R4
+
+L hints 1 to C
+
+C plays G1
+C picks up G1
+
+M plays W1
+M picks up B3
+
+S hints Blue to L (both blue 2) – forgot he wanted to play his second 1
+
+L plays B2
+L picks up Y5
+
+C hints 3 to M
+M plays B3
+M picks up B3
+
+S plays Y1
+S picks up W3
+
+L discards W1
+L picks up Y1
+ C discards R2
+C picks up W3
+
+M hints 5 to L (2 in mid)
+
+S discards W4
+S picks up Y4
+
+L (does not dare to discard “I cannot play a card thus a hint”)
+L hints yellow to Maria (2 Y2s at discard)
+
+C hints 4s to S (G, Y, R, could not play/discard) – “does not dare to discard/play, so gives a ‘useful’ hint)
+
+M does not dare to play the Y but also not discard the 3d 
+M give red to S
+
+S plays Y4  ---- RESULT OF WEIRD HINT BY CHELSEA
+S LOSES LIVE S picks up Y4
+
+L discards B2
+L picks up Y1
+
+C gives hints to M 2
+ M plays Y2
+M picks up B4
+
+S discards W3
+S picks up G2
+
+L gives hint 4 to M (newly picked up blbue 4 can be played)
+
+C discards R4
+C picks up Y3
+
+M plays B4
+M picks up W4
+
+S gives hint Red to C (R2 at discard)
+STIJN IS INCREDIBLY CONFUSED ABOUT HIS FOURS
+ 
+L gives hint 4s to S (yellow 4 at discard)
+
+C plays R2 (was at discard)
+
+
+
+STIJN: IF I DISCARD AND YOU ARE NEXT, IT MEANS IT IS OK TO DISCARD, OTHERWISE I WOULD TELL YOU

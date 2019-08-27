@@ -1,0 +1,220 @@
+game Hanabi
+
+typedef Value = [1, 2, 3, 4, 5]
+typedef Colour = [blue, green, red, white, yellow]
+typedef location = [bluepile, greenpile, redpile, whitepile, yellowpile, discardpile, drawpile, handA, handB, handC, tablelives, tablehints]
+
+deck allCards = [
+R13 = [red, 1],
+R21 = [red, 2],
+R5  = [red, 5],
+W11 = [white, 1],
+Y12 = [yellow, 1],
+G11 = [green, 1],
+B42 = [blue, 4],
+R41 = [red, 4],
+G41 = [green, 4],
+B13 = [blue, 1],
+G12  = [green, 1],
+G22 = [green, 2],
+R32 = [red, 3],
+Y21 = [yellow, 2],
+G13 = [green, 1],
+W21 = [white, 2],
+B5  = [blue, 5],
+Y13 = [yellow, 1],
+G42  = [green, 4],
+W42 = [white, 4],
+Y5  = [yellow, 5],
+G5  = [green, 5],
+G31 = [green, 3],
+Y41 = [yellow, 4],
+W12 = [white, 1],
+W5  = [white, 5],
+W13 = [white, 1],
+W22 = [white, 2],
+R42 = [red, 4],
+R22 = [red, 2],
+Y22 = [yellow, 2],
+Y32 = [yellow, 3],
+Y42 = [yellow, 4],
+W32 = [white, 3],
+G32 = [green, 3]
+] drawpile none []
+
+deck yellowPile = 	[] yellowpile 	top everyone [value = 1 higher than current, color = yellow]
+deck greenPile = 	[] greenpile 	top everyone [value = 1 higher than current, color = green]
+deck redPile = 	[] redpile 	top everyone [value = 1 higher than current, color = red]
+deck whitePile = 	[] whitepile 	top everyone [value = 1 higher than current, color = white]	
+deck bluePile = 	[] bluepile 	top everyone [value = 1 higher than current, color = blue]
+deck discardPile = [] discardpile all everyone []
+deck stijn = [B41, W31, B12, Y31, W41] handS all hanabi []
+deck maria = [B32, R31, B31, G21, B21]  handM all hanabi []
+deck lieuwe = [R11, Y11, B11, B22, R12]  handL all hanabi []
+
+team allPlayers = [S, M, C]
+
+tokens = [
+	lives = [start 3, max 3] tablelives all,
+	hints = [start 8, max 8] tablehints all
+]
+
+players = [S has stijn, M has maria, C has Chelsea]
+
+rules = [ 
+	scoring = [ each = 1 ]
+]
+
+
+
+
+S hints 1 to L
+
+L plays R1
+L picks up R1
+
+M hints Red to L
+S discards W4
+S picks up R2
+
+L plays Y1
+L picks up R5
+
+M discards B2 (INSTEAD OF HINTING R2 TO S)
+M picks up W1
+
+S hints 1 to M
+L plays B1 
+L picks up Y1
+
+M plays W1
+M picks up G1
+
+S hints Green to Maria (1 and 2)
+
+L hints 2 to S (r2)
+M plays G1
+M picks up B4
+
+S plays R2
+S picks up R4
+
+L discards R1
+L picks up G4
+
+M discards G2 (knew it was green)
+M picks up B1 
+
+S hints 2 to L
+L plays B2
+L picks up G1
+
+M hints 5 to L (2nd to discard)
+
+S discards Y3 THEY HAVE NOW LOST THE GAME
+S picks up G2
+
+L hints 3 to Maria (B3 R3 B3 at discard)
+ M does not dare to play
+M hints 2 to S (G2)
+
+S hints Blue to M (so she knows she has 2 B3)
+
+L discards R1
+L picks up R3
+
+M plays B3
+M picks up Y2
+
+S hints 2 to M (Lieuwe has discard 1)
+
+L discards Y1
+L picks G1
+
+Maria lays Y2
+M picks up W2
+ STIJN HAS FORGOTTEN THAT HE HAD A G2 IN HIS HAND
+
+S hints 3 to L (R3) – Maria also has R3 which she knows is a 3
+
+L plays R3 
+L picks up B5
+
+M hints 2 to S
+
+S plays G2
+S picks up Y2
+
+L discards a G4 (few hints left but many to be given)
+L picks up G5
+
+M discards B3
+M picks up W4
+
+S hints B to M (B4 at discard, new card was unplayable 4)
+L hints 2 to M
+
+M plays B4
+M picks up Y5
+
+S hints B to L
+
+L plys B5
+L picks up G5
+
+M plays W2
+M picks up G3
+
+S discards B1
+S picks up Y4
+
+L hints 3 to S (W3 at discard to play)
+ M discards B1 
+M picks up W1
+
+S plays W3
+ S picks up W5
+ L hints 4 to M (White 4 at disc)
+ M plays W4
+M picks up W1
+
+S discard B4
+S picks up W2
+
+L hints 5 to M (discard position)
+
+M hints red to S (Red 4 at discard position, but 2nd card still in)
+
+S plays R4
+S picks up R4
+
+L discard G1
+L picks up R2
+
+M hints 5 to S
+
+S plays W5
+S picks up Y2
+L hints 3s to M (Green at discard)
+
+M plays G3
+M picks up Y3
+
+S duscards Y1
+S picks up Y4
+
+L discards G1
+L picks up W3
+
+Maria makes gyess, plays R3 – ERROR 
+M picks up G3
+
+S hints G to L (G4 at disc, G5 next to it) – Means 5 Is RED
+
+L plays R5
+M plays G3 – ERROR 
+S hints 4 to L
+
+L plays G4 
+
+FINAL SCORE 21
