@@ -2,7 +2,7 @@ module lang::crds::helper
 
 import lang::crds::ast;
 import lang::crds::grammar;
-import lang::crds::runHanabi;
+import lang::crds::runhanabi;
 
 import util::Math;
 
@@ -85,24 +85,24 @@ public list[tuple [str cat, str val]] getConditions(list[Condition] cdns) {
  * Functions to check valid plays.
  ******************************************************************************/
 // Check if a sequence can be done
-public bool checkPlay(sequence(Action first, Action then), Token ts, Decks ds) {
+public bool checkPlay(sequence(Action first, Action second), Tokens ts, Decks ds) {
 	return (checkPlay(first, ts, ds) && checkPlay(second, ts, ds));
 }
 
 // Check if token can be used
-public bool checkPlay(useToken(ID object), Token ts, Decks ds) {
+public bool checkPlay(useToken(ID object), Tokens ts, Decks ds) {
 	if (ts.current[object.name] > 0) return true;
 	return false;
 }
 
 // Check if token can be returned
-public bool checkPlay(returnToken(ID object), Token ts, Decks ds) {
+public bool checkPlay(returnToken(ID object), Tokens ts, Decks ds) {
 	if (ts.current[object.name] < ts.max[object.name]) return true;
 	return false;
 }
 
 // Check if deck may be shuffled.
-public bool checkPlay(shuffleDeck(ID name), Token ts, Decks ds) {
+public bool checkPlay(shuffleDeck(ID name), Tokens ts, Decks ds) {
 	println("SHUFFLE");
 	if (size(deck.cardsets[name.name]) >= 0) return true;
 	return false;	
@@ -116,7 +116,7 @@ public bool checkPlay(distributeCards(real r, ID name, list[ID] locations), Toke
 
 // Check if a card can be taken from the pile.
 public bool checkPlay(takeCard(ID f, list[ID] to), Tokens ts, Decks ds) {
-	if (ds.cardsets[f.name] >= 1) return true;
+	if (size(ds.cardsets[f.name]) >= 1) return true;
 	return false;
 }
 
@@ -147,17 +147,17 @@ public bool checkPlay(moveCard(Exp e, list[ID] from, list[ID] to), Tokens ts, De
 }
 
 
-public bool checkPlay(opt(Action action), Token ts, Decks ds) {
+public bool checkPlay(opt(Action action), Tokens ts, Decks ds) {
 	return checkPlay(action, ts, ds);
 }
 
-public bool checkPlay(req(Action action), Token ts, Decks ds) {
+public bool checkPlay(req(Action action), Tokens ts, Decks ds) {
 	println("REQ");
 	return checkPlay(action, ts, ds);
 }
 
-public bool checkPlay(choice(real r, list[Action] Action), Token ts, Decks ds) {
-	actions = [ action | action <- actions, checkPlay(action) == true];
+public bool checkPlay(choice(real r, list[Action] actions), Tokens ts, Decks ds) {
+	actions = [ a | a <- actions, checkPlay(a, ts, ds) == true];
 	if (size(actions) == 0) return false;
 	
 	return true;

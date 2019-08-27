@@ -7,7 +7,7 @@
  * Contributor	 	Andrea van den Hooff - UvA
  * Date        		August 2019
  ******************************************************************************/
-module lang::crds::analyseTree
+module lang::crds::analysetree
 
 import lang::crds::grammar;
 import lang::crds::ast;

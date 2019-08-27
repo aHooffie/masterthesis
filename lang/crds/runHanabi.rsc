@@ -8,7 +8,7 @@
  * Date        		August 2019
  ******************************************************************************/
 
-module lang::crds::runHanabi
+module lang::crds::runhanabi
 
 import lang::crds::analysis;
 import lang::crds::ast;
@@ -42,7 +42,7 @@ data Players
  * Run a Hanabi game.
  ******************************************************************************/
 void runGame() {
-	CRDSII ast = createTree(|project://masterthesis/src/lang/samples/hanabi.crds|);
+	CRDSII ast = createTree(|project://masterthesis/src/lang/samples/hanabisim1.crds|);
 
 	// First collect all the data.
 	Decks deck = 	decks((), (), (), ());
@@ -89,8 +89,7 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(),
 			
 			// Run turns of players if conditions allow them.
 			for (turn <- turns) {
-				for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;
-				
+				for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;			
 				if (checkPlay(turn, ts, deck) == false) {
 					println("Cannot run current turn. Please take a look at stage <name> and fix this issue.");
 					return <deck, ts>;
@@ -273,10 +272,7 @@ Decks runAction( req(calculateScore(list[ID] objects)), Decks deck) {
  ******************************************************************************/
  // TO DO: 
 tuple [Decks d, Tokens t] runAction(choice(real r, list[Action] actions), Decks deck, Tokens ts, Players ps, str currentPlayer) {
-	println("BEFORE: <size(actions)>");
-	actions = [ action | action <- actions, checkPlay(action) == true];
-	println("AFTER: <size(actions)>");
-	
+	actions = [ a | a <- actions, checkPlay(a, ts, deck) == true];	
 	list[str] options = [ addOption(a) | a <- actions ];
 	int n = 0; 
 	
