@@ -1,0 +1,61 @@
+S hints 1 to C 
+M hints white to C
+C plays W1
+S hints white to M
+M plays W2
+C discards W1
+S hints 5 to M
+M hints 5 to S
+C plays B1
+S discards B1
+M hints 1 to S
+C hints blue to S
+S plays R1
+M discards R3
+C plays Y1 
+S plays B2
+M hints 3 to S
+C hints 2 to S
+S plays Y2
+M hints white to C
+C plays W3
+S discards W4
+M discards G4
+C discards R4
+S hints yellow to M
+M plays Y3
+C hints red to M
+S hints 2 to M
+M plays R2
+C discards R2
+S hints 4 to M
+M plays Y4
+C discards B1
+S hints green to C
+M discards B2
+C discards R5
+S hints 1 to C
+M plays Y5
+C plays G1
+S hints blue to M
+M plays B3
+C discards R1
+S plays R3 
+M hints 5 to C
+C hints 4 to S
+S plays B4
+M discards W1
+C discards G2
+S hints blue to C
+M hints 4 to C
+C plays B5
+S hints 2 to M
+M plays G2
+C plays G3
+S discards W3
+M plays G4
+C plays W4
+S plays G5
+M hints white to S
+C plays R4
+S plays W5

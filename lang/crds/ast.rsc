@@ -39,7 +39,6 @@ anno loc Turnorder@location;
 anno loc Usa@location;
 anno loc Vis@location;
 
-
 /******************************************************************************
  * The cardgame DSL defined in data types for AST building.
  *

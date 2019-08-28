@@ -1,3 +1,4 @@
+
 /******************************************************************************
  * Hanabi test run
  *
@@ -8,7 +9,7 @@
  * Date        		August 2019
  ******************************************************************************/
 
-module lang::crds::runhanabi
+module lang::crds::runsimulation
 
 import lang::crds::analysis;
 import lang::crds::ast;
@@ -37,20 +38,18 @@ data Tokens
 data Players
  = players(map[str name, str handLoc] owners);
  
-data Order 
- = order(list[str] players);
- 
 /******************************************************************************
  * Run a Hanabi game.
  ******************************************************************************/
 void runGame() {
 	CRDSII ast = createTree(|project://masterthesis/src/lang/samples/sim1.crds|);
-
+	list[str] toa = readFileLines(|project://masterthesis/src/lang/samples/toa1|);
+	int currentTurn = 0;
+	
 	// First collect all the data.
 	Decks deck = 	decks((), (), (), ());
 	Players ps =	players(());
 	Tokens ts =		tokens((), ());
-	Order ord = order([]);
 		
 	visit(ast) {
 		case deck(ID name, list[Card] cards, _, list[Prop] props, list[Condition] cdns):
@@ -61,7 +60,6 @@ void runGame() {
 		case token(ID name, real current, real max, _, _):			{ ts.max += (name.name : toInt(max));
 															 		  ts.current += (name.name : toInt(current)); }
 		case hands(str player, ID location):						{ ps.owners += (player : location.name); }
-		case gameflow(Turnorder t, _): 								{ ord.players = addTurnorder(t); }
 	}
 	
 	
@@ -70,7 +68,7 @@ void runGame() {
 	// Loop over stages to run the game.
 	visit(ast) {
 		case gameflow(_, list[Stage] stages): 			{ for (stage <- stages) { 
-															tuple [Decks d, Tokens t] objects = runStage(stage, deck, ts, ps, ord);
+															tuple [Decks d, Tokens t] objects = runStage(stage, deck, ts, ps, toa, currentTurn);
 															deck = objects.d; 
 															ts = objects.t; }
 														}				 
@@ -81,15 +79,18 @@ void runGame() {
 	return;
 }
 
+
+
+
 /******************************************************************************
  * Player round-robin turns.
  ******************************************************************************/
 // Run a stage where the turns consists of each player playing in sequence. 
-tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, Order ord) {
+tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa, int currentTurn) {
 	while (true) {
 		for (player <- ord.players) {
 			// Pretty print information.
-			println("------- It is player <player>\'s turn -------");
+			println("------- It is <player>\'s turn -------");
 			printViewableDecks(deck, ps, player);
 			
 			// Run turns of players if conditions allow them.
@@ -110,7 +111,7 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(),
  	return <deck, ts>;
 }
 
-tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, Order ord) {
+tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa, int currentTurn) {
 	for (player <- ord.players) {
 		// Pretty print information.
 		println("------- It is player <player>\'s turn -------");
@@ -131,6 +132,30 @@ tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), De
 
  	return <deck, ts>;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
  // Take a card in hand from specific pile.
@@ -199,7 +224,7 @@ tuple [Decks d, Tokens t] runAction(communicate(list[ID] locations, Exp e), Deck
  * Dealer actions. // Not implemented: changing turn order.
  ******************************************************************************/
  // Run dealer turn with conditions 
-tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps, Order ord) {	
+tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa, int currentTurn) {	
 	while (true) {	
 		for (turn <- turns) {
 			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;
@@ -216,7 +241,7 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, dealer()
 }
 
 // Run dealer turn with no conditions
-tuple [Decks d, Tokens t] runStage(basic(ID name, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps, Order ord) {
+tuple [Decks d, Tokens t] runStage(basic(ID name, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa, int currentTurn) {
 	for (turn <- turns) {
 		if (checkPlay(turn, ts, deck) == false) {
 			println("Cannot run current turn. Please take a look at stage <name> and fix this issue.");
@@ -429,15 +454,4 @@ list[int] getCardPositions(list[str] cards, str cat) {
 	}
 	
 	return l;
-}
-
-list[str] addTurnorder(turnorder(list[ID] names)) {
-	list[str] result = [];
-	
-	for (name <- names) {
-		if (id(str player) := name)
-			result += player;
-	}
-
-	return result;
 }

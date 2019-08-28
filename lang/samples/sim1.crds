@@ -5,7 +5,6 @@ typedef Colour = [blue, green, red, white, yellow]
 typedef location = [bluepile, greenpile, redpile, whitepile, yellowpile, discardpile, drawpile, handA, handB, handC, tablelives, tablehints]
 
 deck allCards = [
-	Y31 = [yellow, 3],
 	R21 = [red, 2],
 	R22 = [red, 2],
 	W31 = [white, 3],

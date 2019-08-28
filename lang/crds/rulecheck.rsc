@@ -53,7 +53,7 @@ void foo() {
 	
 	if (scoring == false) println("There is no scoring principle. Please double check and fix this rule.");
 	
-	//printRules(r); // Prints links out, but since so maany rather on request
+	//printRules(r); // Prints links out, but since so many rather on request
 		
 	return;
 }
@@ -75,9 +75,7 @@ ruleSet addRule(ruleSet r, Action a) {
 		case moveCard(Exp e, list[ID] from, list[ID] to):  			{ for (name <- from) r = addAction(r, name.name, a); 
 																	  for (name <- to) r = addAction(r, name.name, a); }
 		case communicate(list[ID] locations, Exp e): 				{ for (name <- locations) r = addAction(r, name.name, a); }
- 		case calculateScore(list[ID] objects): 						{ for (name <- objects) r = addAction(r, name.name, a); }
-	 	//	case obtainKnowledge(ID name): {} 		// TO FIX. 
- 		
+ 		case calculateScore(list[ID] objects): 						{ for (name <- objects) r = addAction(r, name.name, a); } 		
 	}
 	
 	return r;
