@@ -1,26 +1,0 @@
-C hints 1 to M 
-M hints 1 to S
-S plays B1
-L hints 1 to C
-C plays G1
-M plays W1
-S hints blue to L
-L plays B2
-C hints 3 to M
-M plays B3
-S plays Y1
-L discards W1 C discards R2
-M hints 5 to L
-S discards W4
-L hints yellow to M
-C hints 4 to S 
-M hints red to S
-S plays Y4
-L discards B2
-C hints 2 to M M plays Y2
-S discards W3
-L hintst 4 to M C discards R4
-M plays B4
-S hints red to C
-L hints 4 to S
-C plays R2

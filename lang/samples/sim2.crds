@@ -39,7 +39,7 @@ B42 = [blue, 4],
 R13 = [red, 1],
 R32 = [red, 3],
 B5  = [blue, 5],
-R13 = [red, 1]
+R13 = [red, 1],
 Y32 = [yellow, 3]
 
 ] drawpile none []
@@ -50,10 +50,10 @@ deck redPile = 		[] redpile 		top everyone [value = 1 higher than current, color
 deck whitePile = 	[] whitepile 	top everyone [value = 1 higher than current, color = white]	
 deck bluePile = 	[] bluepile 	top everyone [value = 1 higher than current, color = blue]
 deck discardPile = [] discardpile all everyone []
-deck stijn = [B11, G42, W41, Y11] handS all hanabi []
-deck maria = [G41, Y21, Y22, W11]  handM all hanabi []
-deck chelsea = [ G11, R21, R41, R22] handC all hanabi []
-deck lieuwe = [R5, B21, W12, B22] handL all hanabi []
+deck stijn = [B11 = [blue, 1], G42 = [green, 4], W41 = [white, 4], Y11 = [yellow, 1]] handS all hanabi []
+deck maria = [G41 = [green, 4], Y21 = [yellow, 2], Y22 = [yellow, 2], W11 = [white, 1]]  handM all hanabi []
+deck chelsea = [ G11 = [green, 1], R21 = [red, 2], R41 = [red, 4], R22 = [red, 2]] handC all hanabi []
+deck lieuwe = [R5 = [red, 5], B21 = [blue, 2], W12 = [white, 1], B22 = [blue, 2]] handL all hanabi []
 
 
 team allPlayers = [C, M, S, L]
@@ -65,6 +65,32 @@ tokens = [
 
 players = [S has stijn, M has maria, C has chelsea, L has lieuwe]
 
-rules = [ 
-	scoring = [ each = 1 ]
-]
+rules = [ scoring = [ each = 1 ] ]
+
+gameflow = [
+	turnorder = [C, M, S, L]	
+	stage midgame = while lives != 0 do, while allCards != empty do
+	turns		
+	[1 of [ 
+
+		giveHint [stijn, maria, chelsea, lieuwe] Value and then useToken hints,
+			
+		moveCard [1 .. 5] from [stijn, maria, chelsea, lieuwe] to [bluePile, yellowPile, whitePile, greenPile, redPile]
+		and then takeCard from allCards to [stijn, maria, chelsea, lieuwe],
+				
+		moveCard [1 .. 5] from [stijn, maria, chelsea, lieuwe] to [discardPile]
+		and then takeCard from allCards to [stijn, maria, chelsea, lieuwe]
+				and then returnToken hints
+	]],
+	
+	stage endgame = while lives != 0 do, for 1 turns do
+	 	turns
+		[1 of [ giveHint [stijn, maria, chelsea, lieuwe] Value and then useToken hints,
+			
+				moveCard [1 .. 5] from [stijn, maria, chelsea, lieuwe] to [bluePile, yellowPile, whitePile, greenPile, redPile],
+						
+				moveCard [1 .. 5] from [stijn, maria, chelsea, lieuwe] to [discardPile]
+				and then returnToken hints
+		]],	
+
+	stage calculateScore = dealer [req calculateScore /* allPlayers */ yellowPile greenPile redPile whitePile bluePile]]

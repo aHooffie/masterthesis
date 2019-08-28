@@ -37,13 +37,16 @@ data Tokens
  
 data Players
  = players(map[str name, str handLoc] owners);
+ 
+int nTurn = 0; // TO FIX
+int currentTurncount = 0;
   
 /******************************************************************************
  * Run a Hanabi game.
  ******************************************************************************/
 void runGame() {
-	CRDSII ast = createTree(|project://masterthesis/src/lang/samples/sim1.crds|);
-	list[str] toa = readFileLines(|project://masterthesis/src/lang/samples/toa1|);
+	CRDSII ast = createTree(|project://masterthesis/src/lang/samples/sim2.crds|);
+	list[str] toa = readFileLines(|project://masterthesis/src/lang/samples/toa2|);
 	
 	// First collect all the data.
 	Decks deck = 	decks((), (), (), ());
@@ -67,6 +70,7 @@ void runGame() {
 	// Loop over stages to run the game.
 	visit(ast) {
 		case gameflow(_, list[Stage] stages): 			{ for (stage <- stages) { 
+															println("STARTING NEW STAGE");
 															tuple [Decks d, Tokens t] objects = runStage(stage, deck, ts, ps, toa);
 															deck = objects.d; 
 															ts = objects.t; }
@@ -86,21 +90,23 @@ void runGame() {
  ******************************************************************************/
 // Run a stage where the turns consists of each player playing in sequence. 
 tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa) {
-	for (int n <- [0 .. size(toa)]) {
-		println("START <n> ///////////////////////////// <size(toa)> /////////////////////////////");		
-	
-		list[str] currentTurn = split(" ", toa[n]);
+	for (int n <- [nTurn .. size(toa)]) {	
+		println(nTurn);
+		println(size(toa));
+		
+		list[str] currentTurn = split(" ", toa[nTurn]);
 		println(currentTurn);
 		str player = currentTurn[0];		
 		
 		// Pretty print information.
 		println("------- It is <player>\'s turn -------");
+		println(deck.cardsets["allCards"]);
 		printViewableDecks(deck, ps, player);
 		
 		// Run turns of players if conditions allow them.
 		for (turn <- turns) {
-			println("HIERR");
-			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;			
+				println("HIERRRRR");
+			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) {currentTurncount = 0; return <deck, ts>; }
 			if (checkPlay(turn, ts, deck) == false) {
 				println("Cannot run current turn. Please take a look at stage <name> and fix this issue.");
 				return <deck, ts>;
@@ -111,15 +117,17 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(),
 			ts = objects.t;
 		}
 		
-		println("END <n> ///////////////////////////// <size(toa)> /////////////////////////////");		
+		nTurn += 1;	
+		currentTurncount += 1;
 	}
-
+	
+	currentTurncount = 0;
  	return <deck, ts>;
 }
 
 tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa) {
 	for (int n <- [0 .. size(toa)]) {
-		list[str] currentTurn = split(" ", toa[n]);
+		list[str] currentTurn = split(" ", toa[nTurn]);
 		str player = currentTurn[0];		
 		
 		// Pretty print information.
@@ -137,8 +145,12 @@ tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), De
 			deck = objects.d;
 			ts = objects.t;
 		}
+		
+		nTurn += 1;
+		currentTurncount += 1;
 	}
 
+	currentTurncount = 0;
  	return <deck, ts>;
 }
 
@@ -282,14 +294,21 @@ tuple [Decks d, Tokens t] runAction(choice(real r, list[Action] actions), Decks 
 		results = [ communicate(locations, e) | a <- actions, sequence(communicate(list[ID] locations, Exp e),_) := a];	
 		return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
 	} else if (currentTurn[1] == "plays") {
-	 	results = [ moveCard(e, from, to) | a <- actions, sequence(moveCard(Exp e, list[ID] from, list[ID] to), _) := a];
-		return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
+		if (size(deck.cardsets["allCards"]) == 0)  {// hacky fix
+			results = [ moveCard(e, from, to) | a <- actions, moveCard(Exp e, list[ID] from, list[ID] to) := a];
+			return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
+		} else  {
+		 	results = [ moveCard(e, from, to) | a <- actions, sequence(moveCard(Exp e, list[ID] from, list[ID] to), _) := a];
+			return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
+		}
 	} else if (currentTurn[1] == "discards") {
-		results = [ moveCard(e, from, to) | a <- actions, 
-			sequence(sequence(moveCard(Exp e, list[ID] from, list[ID] to), _),_) := a
-		];
-
-		return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
+		if (size(deck.cardsets["allCards"]) == 0) {  // hacky fix
+			results = [ moveCard(e, from, to) | a <- actions, sequence(moveCard(Exp e, list[ID] from, list[ID] to), _) := a];
+			return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
+		} else {
+			results = [ moveCard(e, from, to) | a <- actions, sequence(sequence(moveCard(Exp e, list[ID] from, list[ID] to), _),_) := a];
+			return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
+		}
 	} else
 		println("ERROR: Could not understand trace of actions. Please look at them.");
 	
@@ -311,6 +330,11 @@ tuple [Decks d, Tokens t] runAction(moveCard(Exp e, list[ID] fromList, list[ID] 
 		deck.cardsets[from] = delete(deck.cardsets[from], indexOf(deck.cardsets[from], movedCard));
 		deck.cardsets[correctPile] += movedCard; // addCard
 		println("-------- player moved card <movedCard> from <from> to <correctPile>");
+		
+		// ADD TOKEN IF FIVE WAS REACHED
+		if (size(deck.cardsets[correctPile]) == 5) 
+			<deck, ts> = runAction(returnToken(id("hints")), deck, ts, ps, currentPlayer);
+			
 	} else { // Else, move card to discardpile and lose life.
 		deck.cardsets[from] = delete(deck.cardsets[from], indexOf(deck.cardsets[from], movedCard));
 		deck.cardsets["discardPile"] += movedCard;
@@ -321,8 +345,12 @@ tuple [Decks d, Tokens t] runAction(moveCard(Exp e, list[ID] fromList, list[ID] 
 		println("--------- <currentPlayer> lost a life: <ts.current["lives"]> left.");
 	}
 		
+		
+		
 	// TAKE NEW CARD FROM DECK 
-	return runAction(takeCard(id("allCards"), [id(currentPlayer)]), deck, ts, ps, currentPlayer);
+	if (size(deck.cardsets["allCards"]) != 0)
+		return runAction(takeCard(id("allCards"), [id(currentPlayer)]), deck, ts, ps, currentPlayer);
+	else return <deck, ts>;
 	
 }
 
@@ -361,6 +389,15 @@ tuple [Decks d, Tokens t] moveCardToDiscard(str movedCard, str from, Decks deck,
 			currentToken = ts.current[name.name];
 			return currentToken != wantedSize;
 		}
+	}
+}
+
+bool eval(totalTurns(Exp e), Decks ds, Tokens ts) {
+	println("TOTAL TURNS CHECK");
+	println(currentTurncount);
+	if (val(real r) := e) {
+		println(r);
+		return currentTurncount < toInt(r);
 	}
 }
 

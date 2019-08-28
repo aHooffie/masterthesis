@@ -1,20 +1,19 @@
 S hints 1 to L
-L plays B1 
+L plays B11 
 C hints 1 to M
-M plays W1
+M plays W11
 S discards W2
-L plays R1
+L plays R11
 C hints white to S
 M hints 1 to L
-S plays W2
-L plays G1
-C discards G4
+S plays W21
+L plays G11
+C discards G41
 M hints 2 to S
-S plays B2
-S picks up R1
-L hints blue to M  C discards W4
-M plays B4 M picks up R1
-S plays R2
+S plays B21
+L hints blue to M  C discards W41
+M plays B41 M picks up R12
+S plays R21
 L hints 3 to C
 C plays R3
 M hints 2 to L  S hints red to C
@@ -23,32 +22,31 @@ C hints of 3 to Maria
 M plays B3
 S discards B1 
 L hints 5 to C
-C plays R4
-M plays W3
-S hints blue to C  L plays B4 
-C discards W1
+C plays R41
+M plays W31
+S hints blue to C  L plays B41 
+C discards W12
 M hints red to L
-S discards R1
+S discards R12
 L plays R5
 C hints 1 to S
-M discards R1
-S plays Y1
-L discards Y3
-C discards B2
-Maria gives hint yellow to S
-S plays Y2
-L discards G3
-C hints green to Maria M plays G3
+M discards R12
+S plays Y11
+L discards Y31
+C discards B21
+M gives hint yellow to S
+S plays Y21
+L discards G31
+C hints green to Maria M plays G32
 S hints 5 to L
 L  hints 5 to C
-C plays B5 M discards Y2
+C plays B5 M discards Y21
 S hints yellow to L
-L discards G1
+L discards G11
 C hints 4 to M
-M plays G4
-S discards Y4
+M plays G41
+S discards Y41
 L plays G5 C hints yellow to M
-M plays Y3
+M plays Y31
 S hints 4 to L
-L plays Y4
-
+L plays Y42

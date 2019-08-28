@@ -59,8 +59,36 @@ tokens = [
 	hints = [start 8, max 8] tablehints all
 ]
 
-players = [S has stijn, M has maria, C has Chelsea]
+players = [S has stijn, M has maria, L has Lieuwe]
 
 rules = [ 
 	scoring = [ each = 1 ]
 ]
+
+gameflow = [
+	turnorder = [S, L, M]	
+	stage midgame = while lives != 0 do, while allCards != empty do
+	turns		
+	[1 of [ 
+
+		giveHint [stijn, maria, lieuwe] Value and then useToken hints,
+			
+		moveCard [1 .. 5] from [stijn, maria, lieuwe] to [bluePile, yellowPile, whitePile, greenPile, redPile]
+		and then takeCard from allCards to [stijn, maria, lieuwe],
+				
+		moveCard [1 .. 5] from [stijn, maria, lieuwe] to [discardPile]
+		and then takeCard from allCards to [stijn, maria, lieuwe]
+				and then returnToken hints
+	]],
+	
+	stage endgame = while lives != 0 do, for 1 turns do
+	 	turns
+		[1 of [ giveHint [stijn, maria, lieuwe] Value and then useToken hints,
+			
+				moveCard [1 .. 5] from [stijn, maria, lieuwe] to [bluePile, yellowPile, whitePile, greenPile, redPile],
+						
+				moveCard [1 .. 5] from [stijn, maria, lieuwe] to [discardPile]
+				and then returnToken hints
+		]],	
+
+	stage calculateScore = dealer [req calculateScore /* allPlayers */ yellowPile greenPile redPile whitePile bluePile]]
