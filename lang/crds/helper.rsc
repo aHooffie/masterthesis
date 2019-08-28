@@ -152,7 +152,6 @@ public bool checkPlay(opt(Action action), Tokens ts, Decks ds) {
 }
 
 public bool checkPlay(req(Action action), Tokens ts, Decks ds) {
-	println("REQ");
 	return checkPlay(action, ts, ds);
 }
 
@@ -194,10 +193,12 @@ public void printViewableDecks(Decks deck, Players ps, str currentPlayer) {
 		if (d in ps.owners.handLoc) hands += ( d : deck.cardsets[d]);
 		else piles += ( d : deck.cardsets[d]);
 	}
+	println("----------------------------------------------\n----------------------------------------------");
 	
 	printPiles(piles, deck, ps, currentPlayer);
 	printPiles(hands, deck, ps, currentPlayer);
-	
+	println("----------------------------------------------\n----------------------------------------------");
+
 	return;
 }
 

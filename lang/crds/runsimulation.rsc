@@ -37,14 +37,13 @@ data Tokens
  
 data Players
  = players(map[str name, str handLoc] owners);
- 
+  
 /******************************************************************************
  * Run a Hanabi game.
  ******************************************************************************/
 void runGame() {
 	CRDSII ast = createTree(|project://masterthesis/src/lang/samples/sim1.crds|);
 	list[str] toa = readFileLines(|project://masterthesis/src/lang/samples/toa1|);
-	int currentTurn = 0;
 	
 	// First collect all the data.
 	Decks deck = 	decks((), (), (), ());
@@ -68,51 +67,61 @@ void runGame() {
 	// Loop over stages to run the game.
 	visit(ast) {
 		case gameflow(_, list[Stage] stages): 			{ for (stage <- stages) { 
-															tuple [Decks d, Tokens t] objects = runStage(stage, deck, ts, ps, toa, currentTurn);
+															tuple [Decks d, Tokens t] objects = runStage(stage, deck, ts, ps, toa);
 															deck = objects.d; 
 															ts = objects.t; }
 														}				 
 	}
 	
 	println("----------- Game completed -----------"); 
-	 
+	
+	
+	// printStatistics(); 	
 	return;
 }
-
-
 
 
 /******************************************************************************
  * Player round-robin turns.
  ******************************************************************************/
 // Run a stage where the turns consists of each player playing in sequence. 
-tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa, int currentTurn) {
-	while (true) {
-		for (player <- ord.players) {
-			// Pretty print information.
-			println("------- It is <player>\'s turn -------");
-			printViewableDecks(deck, ps, player);
-			
-			// Run turns of players if conditions allow them.
-			for (turn <- turns) {
-				for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;			
-				if (checkPlay(turn, ts, deck) == false) {
-					println("Cannot run current turn. Please take a look at stage <name> and fix this issue.");
-					return <deck, ts>;
-				}
-				
-				tuple [Decks d, Tokens t] objects = runAction(turn, deck, ts, ps, player);
-				deck = objects.d;
-				ts = objects.t;
+tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa) {
+	for (int n <- [0 .. size(toa)]) {
+		println("START <n> ///////////////////////////// <size(toa)> /////////////////////////////");		
+	
+		list[str] currentTurn = split(" ", toa[n]);
+		println(currentTurn);
+		str player = currentTurn[0];		
+		
+		// Pretty print information.
+		println("------- It is <player>\'s turn -------");
+		printViewableDecks(deck, ps, player);
+		
+		// Run turns of players if conditions allow them.
+		for (turn <- turns) {
+			println("HIERR");
+			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;			
+			if (checkPlay(turn, ts, deck) == false) {
+				println("Cannot run current turn. Please take a look at stage <name> and fix this issue.");
+				return <deck, ts>;
 			}
+						
+			tuple [Decks d, Tokens t] objects = runAction(turn, deck, ts, ps, player, currentTurn);
+			deck = objects.d;
+			ts = objects.t;
 		}
+		
+		println("END <n> ///////////////////////////// <size(toa)> /////////////////////////////");		
 	}
 
  	return <deck, ts>;
 }
 
-tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa, int currentTurn) {
-	for (player <- ord.players) {
+tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa) {
+	for (int n <- [0 .. size(toa)]) {
+		list[str] currentTurn = split(" ", toa[n]);
+		str player = currentTurn[0];		
+		
 		// Pretty print information.
 		println("------- It is player <player>\'s turn -------");
 		printViewableDecks(deck, ps, player);
@@ -124,7 +133,7 @@ tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), De
 				return <deck, ts>;
 			}
 			
-			tuple [Decks d, Tokens t] objects = runAction(turn, deck, ps, ts, player);
+			tuple [Decks d, Tokens t] objects = runAction(turn, deck, ps, ts, player, currentTurn);
 			deck = objects.d;
 			ts = objects.t;
 		}
@@ -134,50 +143,22 @@ tuple [Decks d, Tokens t] runStage(basic(ID name, turns(), list[Turn] turns), De
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  // Take a card in hand from specific pile.
 tuple [Decks d, Tokens t] runAction(takeCard(ID from, list[ID] to), Decks deck, Tokens ts, Players ps, str currentPlayer) {
-	deck = takeCard(deck, from.name, [t.name | t <- to, ps.owners[currentPlayer] == t.name || "allCards" == t.name]);
+	list [str] targets = [target.name | target <- to, currentPlayer == target.name];
+	str src = from.name;
+			
+	for (int i <- [0 .. size(targets)]) {
+		tuple [str newCard, list[str] newFrom] result = pop(deck.cardsets[src]);
+		deck.cardsets[src] = result.newFrom;
+		deck.cardsets[ps.owners[targets[i]]] += result.newCard;			
+		println("<targets[i]> TOOK CARD AND ADDED TO <deck.cardsets[ps.owners[targets[i]]]>");
+	}
+	
 	return <deck, ts> ;
 }
 
-// Player takes a card from a specified pile.
-Decks takeCard(Decks deck, str from, list[str] to) {
-	for (int i <- [0 .. size(to)]) {
-		tuple [str newCard, list[str] newFrom] t = pop(deck.cardsets[from]);
-		deck.cardsets[from] = t.newFrom;
-		deck.cardsets[to[i]] += t.newCard;
-		println("------- player took a card from <from> -------");
-	}
-	
-	return deck;
-}
-
 // Players use and return tokens.
-// TO DO: FIX CHECKPLAY
 tuple [Decks d, Tokens t] runAction(useToken(ID object), Decks deck, Tokens ts, Players ps, str currentPlayer){
 	if (ts.current[object.name] == 0) { println("CAN NOT USE TOKEN <object.name>. THERE ARE 0."); return <deck, ts>; }
 
@@ -195,36 +176,28 @@ tuple [Decks d, Tokens t] runAction(returnToken(ID object), Decks deck, Tokens t
 }
 
  // Communicate a hint to another player. 
- // TO DO: LESS HARDCODED.
-tuple [Decks d, Tokens t] runAction(communicate(list[ID] locations, Exp e), Decks deck, Tokens ts, Players ps, str currentPlayer) {	
-	list[str] names = [ player | player <- ps.owners.name, player != currentPlayer];
-	println(stringify(names));
-	str target = "";
-	do {
-		target = prompt("Please pick a player\'s hand to give a hint to: <stringify(names)>");
-	} while (target notin names);			
-	
-	str cat = "";
-	list[str] opts = ["red", "white", "green", "yellow", "blue", "1", "2", "3", "4", "5", "R", "W", "G", "Y", "B"];
-	
-	do {
-		cat =  prompt("Player <target>\'s hand consists of the following cards: \n <deck.cardsets[ps.owners[target]]>.\n Give hint about which color or value?");
-	} while (cat notin opts);
-	
+tuple [Decks d, Tokens t] runAction(communicate(list[ID] locations, Exp e), Decks deck, Tokens ts, Players ps, str currentPlayer, list[str] currentTurn) {	
+	str cat = currentTurn[2];
+	str target = currentTurn[4];
+
 	list[int] cardsWithAttr =  getCardPositions(deck.cardsets[ps.owners[target]], cat);	
 	if (isEmpty(cardsWithAttr)) { 
-		println("There are no cards with this attribute. Please retry to give a hint");
-		runAction(communicate(locations, e), deck, ts, ps, currentPlayer);
+		println(deck.cardsets[ps.owners[target]]);
+		println(cat);
+		println("There are no cards with this attribute. Please fix your trace of actions");
+		return;
 	} else println("<target>\'s cards at position(s) <cardsWithAttr> have the attribute \"<cat>\"");
 	
-	return <deck, ts>;
+
+	// Use token.	
+	return runAction(useToken(id("hints")), deck, ts, ps, currentPlayer);
 }
 
 /******************************************************************************
  * Dealer actions. // Not implemented: changing turn order.
  ******************************************************************************/
  // Run dealer turn with conditions 
-tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa, int currentTurn) {	
+tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa) {	
 	while (true) {	
 		for (turn <- turns) {
 			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) return <deck, ts>;
@@ -241,7 +214,7 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, dealer()
 }
 
 // Run dealer turn with no conditions
-tuple [Decks d, Tokens t] runStage(basic(ID name, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa, int currentTurn) {
+tuple [Decks d, Tokens t] runStage(basic(ID name, dealer(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa) {
 	for (turn <- turns) {
 		if (checkPlay(turn, ts, deck) == false) {
 			println("Cannot run current turn. Please take a look at stage <name> and fix this issue.");
@@ -299,47 +272,42 @@ Decks runAction( req(calculateScore(list[ID] objects)), Decks deck) {
  * FUNCTIONS: X of the following actions 
  ******************************************************************************/
  // TO DO: 
-tuple [Decks d, Tokens t] runAction(choice(real r, list[Action] actions), Decks deck, Tokens ts, Players ps, str currentPlayer) {
-	actions = [ a | a <- actions, checkPlay(a, ts, deck) == true];	
-	list[str] options = [ addOption(a) | a <- actions ];
+tuple [Decks d, Tokens t] runAction(choice(real r, list[Action] actions), Decks deck, Tokens ts, Players ps, str currentPlayer, list[str] currentTurn) {	
+	possibilities = [ a | a <- actions, checkPlay(a, ts, deck) == true];	
+	list[str] options = [ addOption(a) | a <- possibilities];
 	int n = 0; 
+	println("You have the following actions available: \n <stringifyNL(options)>"); // errorprone
 	
-	for (int j <- [1 .. size(options) + 1]) 
-		options[j - 1] = toString(j) + ": " + options[j - 1]; 
+	if (currentTurn[1] == "hints") {
+		results = [ communicate(locations, e) | a <- actions, sequence(communicate(list[ID] locations, Exp e),_) := a];	
+		return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
+	} else if (currentTurn[1] == "plays") {
+	 	results = [ moveCard(e, from, to) | a <- actions, sequence(moveCard(Exp e, list[ID] from, list[ID] to), _) := a];
+		return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
+	} else if (currentTurn[1] == "discards") {
+		results = [ moveCard(e, from, to) | a <- actions, 
+			sequence(sequence(moveCard(Exp e, list[ID] from, list[ID] to), _),_) := a
+		];
 
-	for (int i <- [0 .. toInt(r)]) {
-		do {
-			n = promptForInt("You have the following actions available.\n Please choose the number of the following options: \n  <stringifyNL(options)>"); // errorprone
-		} while (n > size(options) || n < 1);
-	}
+		return runAction(results[0], deck, ts, ps, currentPlayer, currentTurn);
+	} else
+		println("ERROR: Could not understand trace of actions. Please look at them.");
 	
-	return runAction(actions[n - 1], deck, ts, ps, currentPlayer);
+	return;
 }
 
  // Move a card from A to B.
-tuple [Decks d, Tokens t] runAction(moveCard(Exp e, list[ID] fromList, list[ID] to), Decks deck, Tokens ts, Players ps, str currentPlayer) {
+tuple [Decks d, Tokens t] runAction(moveCard(Exp e, list[ID] fromList, list[ID] to), Decks deck, Tokens ts, Players ps, str currentPlayer, list[str] currentTurn) {	
 	str from = [f.name | f <- fromList, ps.owners[currentPlayer] == f.name || "allCards" == f.name][0];
 	list[str] t = [t.name | t <- to];
-	str movedCard;	
-	int indexCard;
-	int handSize = size(deck.cardsets[from]);
-		
-	// Get the correct card to move.
-	if (val(real r) := e) movedCard = deck.cardsets[from][toInt(r)];
-    else if (l(LIST l) := e && l(real min, real max) := l) { 
-		do {
-			indexCard = promptForInt("Please pick a card to move from your hand [1, 2, 3, 4, 5]");
-			movedCard = deck.cardsets[from][toInt(indexCard - 1)];
-		} while (indexCard > handSize || indexCard < 1); // HANABI SPECIFIC!! 
-	} else if (var(id(str name)) := e) movedCard = name;
-		
+	str movedCard = currentTurn[2];	
+					
 	// DISCARDPILE is special case. 
 	if (t == ["discardPile"]) <deck, ts> = moveCardToDiscard(movedCard, from, deck, ts, ps, currentPlayer);
 
 	// Check if card can be played. 
 	else if (checkPlay(movedCard, t, deck) == true) {
 		str correctPile = findCorrectPile(deck.cards[movedCard], t, deck);
-		
 		deck.cardsets[from] = delete(deck.cardsets[from], indexOf(deck.cardsets[from], movedCard));
 		deck.cardsets[correctPile] += movedCard; // addCard
 		println("-------- player moved card <movedCard> from <from> to <correctPile>");
@@ -352,17 +320,15 @@ tuple [Decks d, Tokens t] runAction(moveCard(Exp e, list[ID] fromList, list[ID] 
 		println("--------- <movedCard> is now moved to the discard pile.");		
 		println("--------- <currentPlayer> lost a life: <ts.current["lives"]> left.");
 	}
-	
+		
 	// TAKE NEW CARD FROM DECK 
+	return runAction(takeCard(id("allCards"), [id(currentPlayer)]), deck, ts, ps, currentPlayer);
 	
-	
-	<deck, ts> = runAction(takeCard(id("discardPile"), [id("currentPlayer")]), deck, ts, ps, currentPlayer);
-	
-			
-	return <deck, ts>;
 }
 
 // Requires no checks -- can merge when conditions are checked 
+
+// , list[str] currentTurn ?????
 tuple [Decks d, Tokens t] moveCardToDiscard(str movedCard, str from, Decks deck, Tokens ts, Players ps, str currentPlayer) {
 	// move card to discardpile
 	deck.cardsets[from] = delete(deck.cardsets[from], indexOf(deck.cardsets[from], movedCard));

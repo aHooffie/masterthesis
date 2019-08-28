@@ -1,61 +1,61 @@
 S hints 1 to C 
 M hints white to C
-C plays W1
+C plays W11
 S hints white to M
-M plays W2
-C discards W1
+M plays W21
+C discards W12
 S hints 5 to M
 M hints 5 to S
-C plays B1
-S discards B1
+C plays B12
+S discards B11
 M hints 1 to S
 C hints blue to S
-S plays R1
-M discards R3
-C plays Y1 
-S plays B2
+S plays R11
+M discards R31
+C plays Y11 
+S plays B21
 M hints 3 to S
 C hints 2 to S
-S plays Y2
+S plays Y21
 M hints white to C
-C plays W3
-S discards W4
-M discards G4
-C discards R4
+C plays W31
+S discards W41
+M discards G41
+C discards R41
 S hints yellow to M
-M plays Y3
+M plays Y31
 C hints red to M
 S hints 2 to M
-M plays R2
-C discards R2
+M plays R22
+C discards R21
 S hints 4 to M
-M plays Y4
-C discards B1
+M plays Y41
+C discards B13
 S hints green to C
-M discards B2
-C discards R5
+M discards B22
+C discards R5 // LOST! 
 S hints 1 to C
 M plays Y5
-C plays G1
+C plays G11
 S hints blue to M
-M plays B3
-C discards R1
-S plays R3 
+M plays B32
+C discards R12
+S plays R32 
 M hints 5 to C
 C hints 4 to S
-S plays B4
-M discards W1
-C discards G2
+S plays B41
+M discards W13
+C discards G21
 S hints blue to C
 M hints 4 to C
 C plays B5
 S hints 2 to M
-M plays G2
-C plays G3
-S discards W3
-M plays G4
-C plays W4
+M plays G22
+C plays G31
+S discards W32
+M plays G42
+C plays W42
 S plays G5
 M hints white to S
-C plays R4
+C plays R42
 S plays W5

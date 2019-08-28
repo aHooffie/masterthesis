@@ -98,14 +98,14 @@ gameflow = [
 			and then returnToken hints
 			]],
 		
-	// stage endgame = while lives != 0, for 1 turns
-	// 	turns
-	//	[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
+	stage endgame = while lives != 0, for 1 turns
+	 	turns
+		[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
 
-	//			moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile],
-	//			
-	//			moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [discardPile]
-	//			and then returnToken hints
-	//		]],	
+				moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [bluePile, yellowPile, whitePile, greenPile, redPile],
+				
+				moveCard [1 .. 5] from [handPlayerA, handPlayerB, handPlayerC] to [discardPile]
+				and then returnToken hints
+			]],	
 	stage calculateScore = dealer [req calculateScore /* allPlayers */ yellowPile greenPile redPile whitePile bluePile]
 ]

@@ -105,7 +105,7 @@ syntax Hands
 syntax Condition // TO DO!!
  = deckCondition: "if" Exp "then" Action
  | stageCondition: "while" Exp "do"
- | totalTurns: "for" Exp "turns"
+ | totalTurns: "for" Exp "turns" "do"
  | higher: "value" "=" "higher than current"
  | lower: "value" "=" "lower than current"
  | xhigher: "value" "=" VALUE "higher than current"
