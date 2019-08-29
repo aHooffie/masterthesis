@@ -44,9 +44,20 @@ int currentTurncount = 0;
 /******************************************************************************
  * Run a Hanabi game.
  ******************************************************************************/
-void runGame() {
-	CRDSII ast = createTree(|project://masterthesis/src/lang/samples/sim2.crds|);
-	list[str] toa = readFileLines(|project://masterthesis/src/lang/samples/toa2|);
+void runGame(int sim) {
+	CRDSII ast;
+	list[str] toa;
+	
+	switch (sim) {
+	case 1: { ast = createTree(|project://masterthesis/src/lang/samples/sim1.crds|);
+			  toa = readFileLines(|project://masterthesis/src/lang/samples/toa1|); }
+	case 2: { ast = createTree(|project://masterthesis/src/lang/samples/sim2.crds|);
+	 		  toa = readFileLines(|project://masterthesis/src/lang/samples/toa2|); }
+	case 3: { ast = createTree(|project://masterthesis/src/lang/samples/sim3.crds|);
+			  toa = readFileLines(|project://masterthesis/src/lang/samples/toa3|); }
+	case 4: { ast = createTree(|project://masterthesis/src/lang/samples/sim4.crds|);
+			  toa = readFileLines(|project://masterthesis/src/lang/samples/toa4|); }
+	}
 	
 	// First collect all the data.
 	Decks deck = 	decks((), (), (), ());
@@ -65,19 +76,18 @@ void runGame() {
 	}
 	
 	
-	println("----------- Starting game -----------"); 
+	println("--------------- Starting game ---------------"); 
 	
 	// Loop over stages to run the game.
 	visit(ast) {
 		case gameflow(_, list[Stage] stages): 			{ for (stage <- stages) { 
-															println("STARTING NEW STAGE");
 															tuple [Decks d, Tokens t] objects = runStage(stage, deck, ts, ps, toa);
 															deck = objects.d; 
 															ts = objects.t; }
 														}				 
 	}
 	
-	println("----------- Game completed -----------"); 
+	println("--------------- Game completed ---------------\n----------------------------------------------"); 
 	
 	
 	// printStatistics(); 	
@@ -91,22 +101,18 @@ void runGame() {
 // Run a stage where the turns consists of each player playing in sequence. 
 tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa) {
 	for (int n <- [nTurn .. size(toa)]) {	
-		println(nTurn);
-		println(size(toa));
-		
 		list[str] currentTurn = split(" ", toa[nTurn]);
-		println(currentTurn);
+		println(currentTurn); //bug fixing
 		str player = currentTurn[0];		
 		
 		// Pretty print information.
-		println("------- It is <player>\'s turn -------");
-		println(deck.cardsets["allCards"]);
+		println("--------------- It is <player>\'s turn ---------------");
 		printViewableDecks(deck, ps, player);
+	
 		
 		// Run turns of players if conditions allow them.
 		for (turn <- turns) {
-				println("HIERRRRR");
-			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) {currentTurncount = 0; return <deck, ts>; }
+			for (cdn <- cdns) if (eval(cdn, deck, ts) == false) { currentTurncount = 0; return <deck, ts>; }
 			if (checkPlay(turn, ts, deck) == false) {
 				println("Cannot run current turn. Please take a look at stage <name> and fix this issue.");
 				return <deck, ts>;
@@ -115,10 +121,12 @@ tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(),
 			tuple [Decks d, Tokens t] objects = runAction(turn, deck, ts, ps, player, currentTurn);
 			deck = objects.d;
 			ts = objects.t;
+			
+			currentTurncount += 1;
+			
 		}
 		
 		nTurn += 1;	
-		currentTurncount += 1;
 	}
 	
 	currentTurncount = 0;
@@ -164,7 +172,7 @@ tuple [Decks d, Tokens t] runAction(takeCard(ID from, list[ID] to), Decks deck, 
 		tuple [str newCard, list[str] newFrom] result = pop(deck.cardsets[src]);
 		deck.cardsets[src] = result.newFrom;
 		deck.cardsets[ps.owners[targets[i]]] += result.newCard;			
-		println("<targets[i]> TOOK CARD AND ADDED TO <deck.cardsets[ps.owners[targets[i]]]>");
+		println("<targets[i]> took a new card from the drawpile.");
 	}
 	
 	return <deck, ts> ;
@@ -175,7 +183,7 @@ tuple [Decks d, Tokens t] runAction(useToken(ID object), Decks deck, Tokens ts, 
 	if (ts.current[object.name] == 0) { println("CAN NOT USE TOKEN <object.name>. THERE ARE 0."); return <deck, ts>; }
 
 	ts.current[object.name] -= 1;
-	println("-------  <currentPlayer> used a token <object.name>. There are now <ts.current[object.name]> left. ------- ");
+	println("-------  <currentPlayer> used a token <object.name>, <ts.current[object.name]> left. ------- ");
 	return <deck, ts> ;
 }
 
@@ -269,14 +277,14 @@ Decks runAction(req(shuffleDeck(ID name)), Decks deck) {
 
 // Dealer actions by partial functions.
 Decks runAction( req(calculateScore(list[ID] objects)), Decks deck) {
-	println("--------- Calculating score ---------");
+	println("----------------------------------------------\n------------- Calculating score --------------");
 	
 	int totalScore = 0;
 	list[str] names = [ obj.name | obj <- objects];
 	
 	for ( name <- names) totalScore += size(deck.cardsets[name]);
 		
-	println("------- Your total score is <totalScore> ------- ");
+	println("-------------- Total score: <totalScore> --------------- ");
 	
 	return deck;
 }
@@ -289,6 +297,7 @@ tuple [Decks d, Tokens t] runAction(choice(real r, list[Action] actions), Decks 
 	list[str] options = [ addOption(a) | a <- possibilities];
 	int n = 0; 
 	println("You have the following actions available: \n <stringifyNL(options)>"); // errorprone
+	println("----------------------------------------------\n----------------------------------------------");
 	
 	if (currentTurn[1] == "hints") {
 		results = [ communicate(locations, e) | a <- actions, sequence(communicate(list[ID] locations, Exp e),_) := a];	
@@ -329,7 +338,7 @@ tuple [Decks d, Tokens t] runAction(moveCard(Exp e, list[ID] fromList, list[ID] 
 		str correctPile = findCorrectPile(deck.cards[movedCard], t, deck);
 		deck.cardsets[from] = delete(deck.cardsets[from], indexOf(deck.cardsets[from], movedCard));
 		deck.cardsets[correctPile] += movedCard; // addCard
-		println("-------- player moved card <movedCard> from <from> to <correctPile>");
+		println("--- Card <movedCard> moved from <from> to <correctPile> ---");
 		
 		// ADD TOKEN IF FIVE WAS REACHED
 		if (size(deck.cardsets[correctPile]) == 5) 
@@ -393,12 +402,8 @@ tuple [Decks d, Tokens t] moveCardToDiscard(str movedCard, str from, Decks deck,
 }
 
 bool eval(totalTurns(Exp e), Decks ds, Tokens ts) {
-	println("TOTAL TURNS CHECK");
-	println(currentTurncount);
-	if (val(real r) := e) {
-		println(r);
-		return currentTurncount < toInt(r);
-	}
+	if (val(real r) := e)
+		return (currentTurncount / 3) <= toInt(r);
 }
 
  // TO DO: add more eval options -- now only checks [deck / token ] == [value]

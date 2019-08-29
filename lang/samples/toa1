@@ -33,7 +33,7 @@ M plays Y41
 C discards B13
 S hints green to C
 M discards B22
-C discards R5 // LOST! 
+C discards R5
 S hints 1 to C
 M plays Y5
 C plays G11
@@ -54,8 +54,7 @@ M plays G22
 C plays G31
 S discards W32
 M plays G42
-C plays W42
-S plays G5 // LAST CARD PICKED UP
+C plays W42 // last card
+S plays G5
 M hints white to S
 C plays R42
-S plays W5

@@ -5,43 +5,42 @@ typedef Colour = [blue, green, red, white, yellow]
 typedef location = [bluepile, greenpile, redpile, whitepile, yellowpile, discardpile, drawpile, handA, handB, handC, tablelives, tablehints]
 
 deck allCards = [
-R41 = [red, 4],
-G12 = [green, 1],
-B31 = [blue, 3],
-Y5  = [yellow, 5],
-B32 = [blue, 3],
-W31 = [white, 3],
-Y12 = [yellow, 1],
-W32 = [white, 3],
-Y41 = [yellow, 4],
-Y42 = [yellow, 4],
-Y13 = [yellow, 1],
-B41 = [blue, 4],
-G21 = [green, 2],
-Y31 = [yellow, 3],
-W42 = [white, 4],
-W5  = [white, 5],
-B12 = [blue, 1],
-G5 = [green, 5],
-G13 = [green, 1],
-W13 = [white, 1],
-R12 = [red, 1],
-	W21 = [white, 2],
-	B13 = [blue, 1],
-	G31 = [green, 3],
-	W22 = [white, 2],
-	G32 = [green, 3],
-	G22 = [green, 2],
-	R31 = [red, 3],
+	R41 = [red, 4],
+	G12 = [green, 1],
+	B31 = [blue, 3],
+	Y5  = [yellow, 5],
+	B32 = [blue, 3],
+	W31 = [white, 3],
+	Y12 = [yellow, 1],
+	W32 = [white, 3],
+	Y41 = [yellow, 4],
+	Y42 = [yellow, 4],
+	Y13 = [yellow, 1],
 	B41 = [blue, 4],
-R31 = [red, 3],
-B42 = [blue, 4],
-R13 = [red, 1],
-R32 = [red, 3],
-B5  = [blue, 5],
-R13 = [red, 1],
-Y32 = [yellow, 3]
-
+	G21 = [green, 2],
+	Y31 = [yellow, 3],
+	W42 = [white, 4],
+	W5  = [white, 5],
+	B12 = [blue, 1],
+	G5 = [green, 5],
+	G13 = [green, 1],
+	W13 = [white, 1],
+	R12 = [red, 1],
+		W21 = [white, 2],
+		B13 = [blue, 1],
+		G31 = [green, 3],
+		W22 = [white, 2],
+		G32 = [green, 3],
+		G22 = [green, 2],
+		R31 = [red, 3],
+		B41 = [blue, 4],
+	R31 = [red, 3],
+	B42 = [blue, 4],
+	R13 = [red, 1],
+	R32 = [red, 3],
+	B5  = [blue, 5],
+	R13 = [red, 1],
+	Y32 = [yellow, 3]
 ] drawpile none []
 
 deck yellowPile = 	[] yellowpile 	top everyone [value = 1 higher than current, color = yellow]
@@ -72,7 +71,6 @@ gameflow = [
 	stage midgame = while lives != 0 do, while allCards != empty do
 	turns		
 	[1 of [ 
-
 		giveHint [stijn, maria, chelsea, lieuwe] Value and then useToken hints,
 			
 		moveCard [1 .. 5] from [stijn, maria, chelsea, lieuwe] to [bluePile, yellowPile, whitePile, greenPile, redPile]

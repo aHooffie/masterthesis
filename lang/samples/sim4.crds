@@ -48,9 +48,9 @@ deck redPile = 	[] redpile 	top everyone [value = 1 higher than current, color =
 deck whitePile = 	[] whitepile 	top everyone [value = 1 higher than current, color = white]	
 deck bluePile = 	[] bluepile 	top everyone [value = 1 higher than current, color = blue]
 deck discardPile = [] discardpile all everyone []
-deck stijn = [B41, W31, B12, Y31, W41] handS all hanabi []
-deck maria = [B32, R31, B31, G21, B21]  handM all hanabi []
-deck lieuwe = [R11, Y11, B11, B22, R12]  handL all hanabi []
+deck stijn = [B41 = [blue, 4], W31 = [white, 3], B12 = [blue, 1], Y31 = [yellow, 3], W41 = [white, 4]] handS all hanabi []
+deck maria = [B32 = [blue, 3], R31 = [red, 3], B31 = [blue, 3], G21 = [green, 2], B21 = [blue, 2]]  handM all hanabi []
+deck lieuwe = [R11 = [red, 1], Y11 = [yellow, 1], B11 = [blue, 1], B22 = [blue, 2], R12 = [red, 1]]  handL all hanabi []
 
 team allPlayers = [S, M, C]
 
@@ -59,11 +59,9 @@ tokens = [
 	hints = [start 8, max 8] tablehints all
 ]
 
-players = [S has stijn, M has maria, L has Lieuwe]
+players = [S has stijn, M has maria, L has lieuwe]
 
-rules = [ 
-	scoring = [ each = 1 ]
-]
+rules = [ scoring = [ each = 1 ] ]
 
 gameflow = [
 	turnorder = [S, L, M]	

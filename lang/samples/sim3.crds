@@ -47,10 +47,10 @@ deck redPile = 		[] redpile 		top everyone [value = 1 higher than current, color
 deck whitePile = 	[] whitepile 	top everyone [value = 1 higher than current, color = white]	
 deck bluePile = 	[] bluepile 	top everyone [value = 1 higher than current, color = blue]
 deck discardPile = [] discardpile all everyone []
-deck stijn = [B12, Y21, W22, W21] handS all hanabi []
-deck maria = [G32, B41, B31, W11]  handM all hanabi []
-deck chelsea = [R41, R31, W41, G41] handC all hanabi []
-deck lieuwe = [G31, R11, Y31, B11] handL all hanabi []
+deck stijn = [B12 = [blue, 1], Y21 = [yellow, 2], W22 = [white, 2], W21 = [white, 2]] handS all hanabi []
+deck maria = [G32 = [green, 3], B41 = [blue, 4], B31 = [blue, 3], W11 = [white, 1]]  handM all hanabi []
+deck chelsea = [R41 = [red, 4], R31 = [red, 3], W41 = [white, 4], G41 = [green, 4]] handC all hanabi []
+deck lieuwe = [G31 = [green, 3], R11 = [red, 1], Y31 = [yellow, 3], B11 = [blue, 1]] handL all hanabi []
 
 
 team allPlayers = [S, M, C]

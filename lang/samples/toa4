@@ -1,56 +1,62 @@
 S hints 1 to L
-L plays R1
+L plays R11
 M hints red to L
-S discards W4
-L plays Y1
-M discards B2
+S discards W41
+L plays Y11
+M discards B21
 S hints 1 to M
-L plays B1 
-M plays W1
-S hints green to M L hints 2 to S
-M plays G1
-S plays R2
-L discards R1
-M discards G2
+L plays B11
+M plays W11
+S hints green to M
+L hints 2 to S
+M plays G11
+S plays R21
+L discards R12
+M discards G21
 S hints 2 to L
-L plays B2
+L plays B22
 M hints 5 to L
-S discards Y3
-L hints 3 to M M hints 2 to S
-S hints blue to M
-L discards R1
-M plays B3
-S hints 2 to M
-L discards Y1
-Maria plays Y2 S hints 3 to L
-L plays R3 
+S discards Y31
+L hints 3 to M
 M hints 2 to S
-S plays G2
-L discards a G4
-M discards B3
-S hints B to M
+S hints blue to M
+L discards R13
+M plays B31
+S hints 2 to M
+L discards Y12
+M plays Y21
+S hints 3 to L
+L plays R32
+M hints 2 to S
+S plays G22
+L discards G41
+M discards B32
+S hints blue to M
 L hints 2 to M
-M plays B4
+M plays B42
 S hints blue to L
 L plays B5
-M plays W2
-S discards B1
-L hints 3 to S M discards B1 
-S plays W3 L hints 4 to M M plays W4
-S discard B4
-L hints 5 to M 
+M plays W21
+S discards B12
+L hints 3 to S
+M discards B13
+S plays W31
+L hints 4 to M
+M plays W42
+S discards B41
+L hints 5 to M
 M hints red to S
-S plays R4
-L discard G1
+S plays R41
+L discards G13
 M hints 5 to S
 S plays W5
 L hints 3 to M
-M plays G3
-S discards Y1
-L discards G1
-M plays R3
+M plays G31
+S discards Y13
+L discards G12
+M plays R31
 S hints green to L
 L plays R5
-M plays G3
+M plays G32
 S hints 4 to L
-L plays G4
+L plays G42
