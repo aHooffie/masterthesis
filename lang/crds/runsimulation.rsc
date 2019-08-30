@@ -100,9 +100,11 @@ void runGame(int sim) {
  ******************************************************************************/
 // Run a stage where the turns consists of each player playing in sequence. 
 tuple [Decks d, Tokens t] runStage(stage(ID name, list[Condition] cdns, turns(), list[Turn] turns), Decks deck, Tokens ts, Players ps, list[str] toa) {
-	for (int n <- [nTurn .. size(toa)]) {	
+	for (int n <- [nTurn .. size(toa)]) {
+		//println("<nTurn> , <size(toa)>"); // bug fixing
+		
 		list[str] currentTurn = split(" ", toa[nTurn]);
-		println(currentTurn); //bug fixing
+		//println(currentTurn); //bug fixing
 		str player = currentTurn[0];		
 		
 		// Pretty print information.

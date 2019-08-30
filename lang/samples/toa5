@@ -1,0 +1,56 @@
+S hints 1 to M
+M plays W11
+C hints red to S
+S hints yellow to C
+M plays B11
+C plays Y11
+S plays R11
+M plays G11 // all ones have been played
+C hints 5 to S
+S hints 3 to C
+M plays R21
+C plays R31
+S hints 5 to M
+M hints 4 to C
+C plays R41
+S discards R12
+M hints 5 to C // could be red 4 but due to info is not.
+C hints 3 to M
+S plays W21
+M plays W31
+C discards Y12 
+S hints red to M
+M plays R5  ///// gehad
+C hints 4 to M
+S discards R13
+M plays W41
+C discards Y13
+S hints white to C
+M discards G12
+C plays W5
+S hints 2 to M
+M plays B21
+C discards B12
+S hints 3 to C
+M plays Y21
+C plays B32
+S discards B31
+M hints 2 to C
+C hints 4 to S
+S plays B41
+M plays B5
+C plays G21
+S hints 4 to C
+M plays G32
+C plays G42
+S discards W12
+M hints 4 to C
+C discards G13
+
+S hints 3 to M
+M plays Y31
+C plays Y41
+S plays Y5
+M hints 5 to S
+C discards Y22
+S plays G5

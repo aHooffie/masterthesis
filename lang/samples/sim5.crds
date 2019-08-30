@@ -1,0 +1,90 @@
+game Hanabi
+
+typedef Value = [1, 2, 3, 4, 5]
+typedef Colour = [blue, green, red, white, yellow]
+typedef location = [bluepile, greenpile, redpile, whitepile, yellowpile, discardpile, drawpile, handA, handB, handC, tablelives, tablehints]
+
+deck allCards = [
+	R5  = [red, 5],
+	B5  = [blue, 5],
+	W5  = [white, 5],
+	Y5  = [yellow, 5],
+	R21 = [red, 2],
+	G12 = [green, 1],
+	B12 = [blue, 1],
+	G21 = [green, 2], 
+	W21 = [white, 2],
+	W12 = [white, 1],
+	W13 = [white, 1],
+	G13 = [green, 1], 
+	B13 = [blue, 1], ///// gehad
+	G21 = [green, 2],
+	Y21 = [yellow, 2],
+	Y22 = [yellow, 2],
+	B21 = [blue, 2],
+	B32 = [blue, 3],
+	G41 = [green, 4],
+	G42 = [green, 4],
+	W32 = [white, 3],
+	G31 = [green, 3],
+	W22 = [white, 2],	
+	G5  = [green, 5],
+	G32 = [green, 3], // 	Y31 = [yellow, 3],		
+	R22 = [red, 2],
+	Y31 = [yellow, 3],			
+	R32 = [red, 3],
+	W42 = [white, 4],
+	B22 = [blue, 2],
+	B42 = [blue, 4],
+	Y32 = [yellow, 3],
+	Y42 = [yellow, 4]	
+] drawpile none []
+
+deck yellowPile = 	[] yellowpile 	top everyone [value = 1 higher than current, color = yellow]
+deck greenPile = 	[] greenpile 	top everyone [value = 1 higher than current, color = green]
+deck redPile = 		[] redpile 	top everyone [value = 1 higher than current, color = red]
+deck whitePile = 	[] whitepile 	top everyone [value = 1 higher than current, color = white]	
+deck bluePile = 	[] bluepile 	top everyone [value = 1 higher than current, color = blue]
+deck discardPile = 	[] discardpile all everyone []
+deck stijn = 		[R11 = [red, 1], R12 = [red, 1], R13 = [red, 1], B31 = [blue, 3], B41 = [blue, 4]] handS all hanabi []
+deck maria = 		[W11 = [white, 1], B11 = [blue, 1], G11 = [green, 1], W31 = [white, 3], W41 = [white, 4]] handC all hanabi []
+deck chelsea = 		[Y11 = [yellow, 1], Y12 = [yellow, 1], Y13 = [yellow, 1], R31 = [red, 3], R41 = [red, 4]]  handM all hanabi []
+
+team allPlayers = [C, S, M]
+
+tokens = [
+	lives = [start 3, max 3] tablelives all,
+	hints = [start 8, max 8] tablehints all
+]
+
+players = [C has chelsea, S has stijn, M has maria]
+
+rules = [ scoring = [ each = 1 ] ]
+
+gameflow = [
+	turnorder = [S, M, C]	
+	stage midgame = while lives != 0 do, while allCards != empty do
+	turns		
+	[1 of [ 
+
+		giveHint [stijn, maria, chelsea] Value and then useToken hints,
+			
+		moveCard [1 .. 5] from [stijn, maria, chelsea] to [bluePile, yellowPile, whitePile, greenPile, redPile]
+		and then takeCard from allCards to [stijn, maria, chelsea],
+				
+		moveCard [1 .. 5] from [stijn, maria, chelsea] to [discardPile]
+		and then takeCard from allCards to [stijn, maria, chelsea]
+				and then returnToken hints
+	]],
+	
+	stage endgame = while lives != 0 do, for 1 turns do
+	 	turns
+		[1 of [ giveHint [stijn, maria, chelsea] Value and then useToken hints,
+			
+				moveCard [1 .. 5] from [stijn, maria, chelsea] to [bluePile, yellowPile, whitePile, greenPile, redPile],
+						
+				moveCard [1 .. 5] from [stijn, maria, chelsea] to [discardPile]
+				and then returnToken hints
+		]],	
+
+	stage calculateScore = dealer [req calculateScore /* allPlayers */ yellowPile greenPile redPile whitePile bluePile]]
