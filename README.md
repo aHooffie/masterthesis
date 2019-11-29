@@ -16,7 +16,7 @@ First, open up Eclipse and carry out the following:
 - import lang::crds::runhanabi;
 - runGame(); # TODO: Update correct game as input
 
-3b) To run an example game of Hanabi - output can be seen in exampleSimulation1:
+3b) To run an example game of Hanabi - example in output/exampleSimulation1:
 - import lang::crds::runsimulation;
 - runSimulation(int n);
 
