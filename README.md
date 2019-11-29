@@ -3,11 +3,17 @@
 This project shows several options:
 
 First, open up Eclipse and carry out the following:
-- import lang::crds::grammar; 
-- import lang::crds::ast;
+- import lang::crds::basis::grammar; 
+- import lang::crds::basis::ast;
 
-1) To parse a newly defined game and check for grammatical errors: # TODO: Check this.
-- import lang::crds:: 
+1) To parse a newly defined game and check for grammatical errors:
+- import lang::crds::basis::ide;
+- crds_register();
+- Right-click .crds file and choose "Open With.. Impulse Editor"
+If the game is correctly written, the objects will be highlighted accordingly.
+1b) For detailed feedback on wrongly parsed grammar:
+- import lang::crds::basis::                             # TODO: Check this.
+
 
 2) To perform a static analysis of the parsed rules: # TODO: Check this.
 - import lang::crds::
