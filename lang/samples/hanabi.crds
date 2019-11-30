@@ -98,7 +98,7 @@ gameflow = [
 			and then returnToken hints
 			]],
 		
-	stage endgame = while lives != 0, for 1 turns
+	stage endgame = while lives != 0 do, for 1 turns do
 	 	turns
 		[1 of [ giveHint [handPlayerA, handPlayerB, handPlayerC] Value and then useToken hints,
 
