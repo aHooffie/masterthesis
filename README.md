@@ -18,14 +18,14 @@ This project shows several options. First, open up Eclipse and carry out the fol
 > import lang::crds::analysis::rulecheck; 
 > analyseRules(loc gamefile);
 
-3a) To play your own game of Hanabi: # TODO: Check this.
+3a) To play your own game of Hanabi:
 > import lang::crds::hanabi::runhanabi;
 > runGame();
 
 3b) To run an example game of Hanabi - example in output/exampleSimulation1:
 > import lang::crds::hanabi::runsimulation;
-> runSimulation(int n);
+> runSimulation(int filenumber);
 
-4) To verify designer hypotheses of Hanabi: # TODO: Check this.
+4) To verify designer hypotheses of Hanabi - example in output/exampleHypotheses
 > import lang::crds::hanabi::checkhypotheses;
-> runhypotheses(int n);
+> runhypotheses(int filenumber);
