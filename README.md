@@ -15,8 +15,8 @@ This project shows several options. First, open up Eclipse and carry out the fol
 > checkGrammar(loc gamefile);
 
 2) To perform a static analysis of the parsed rules:
-> import lang::crds::analysis::rulecheck;  
-> analyseRules(loc gamefile);
+> import lang::crds::analysis::generalmetrics;  
+> analysePrototype(loc gamefile);
 
 3a) To play your own game of Hanabi:
 > import lang::crds::hanabi::runhanabi;  
