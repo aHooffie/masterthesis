@@ -1,0 +1,17 @@
+game Notexisting
+
+typedef location = [yellowpile, discardpile, drawpile]
+
+deck DrawPile = 
+[
+	B1 = [blue, 1],
+	B21 = [blue, 2],
+	BlueCard = [blue, 3],
+	BlueCard2 = [blue, 3],
+	BlueCard3 = [blue, 4]
+] drawpile none []
+
+gameflow = [
+	turnorder = [A, B, C]
+	stage dealing = dealer [req shuffle DrawPile, req distribute 5 from DrawPile to [A, B, C]]
+]

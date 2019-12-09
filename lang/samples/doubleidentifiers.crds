@@ -1,0 +1,14 @@
+game Doubleidentifiers
+
+typedef location = [yellowpile, discardpile, drawpile]
+
+deck DrawPile = 
+[
+	B1 = [blue, 1],
+	B21 = [blue, 2],
+	BlueCard = [blue, 3],
+	BlueCard2 = [blue, 3],
+	BlueCard3 = [blue, 4],
+	Bluecard = [blue, 4],
+	BlueCard =  [blue, 5]
+] drawpile none []

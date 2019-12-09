@@ -5,7 +5,7 @@
  * Package			lang::crds::analysis
  * Brief       		Checks variable definitions and uses on correct usage.
  * Contributor	 	Andrea van den Hooff - UvA
- * Date        		August 2019
+ * Date        		December 2019
  ******************************************************************************/
 
 module lang::crds::analysis::grammaranalysis
@@ -53,21 +53,34 @@ void checkGrammar(loc f) {
 	
 	// Add all ID definitions to the LUT and check all uses.
 	lut = addDefs(implodedFile, lut);	
-	if (errorsFound != 0) { println("Errors found during definition adding. Please adjust your game description accordingly."); return; }		
+	if (errorsFound != 0) { 
+		println("----------------------------------------");
+		println("Found errors during coreference resolution (definitions).\nPlease adjust your object definitions.");
+		return;
+	}		
 	
 	// Check if all ID's in grammar are defined somewhere. 
 	checkDefs(implodedFile, lut);
-	if (errorsFound != 0) { println("Errors found during definition checking. Please adjust your game description accordingly."); return; }
+	if (errorsFound != 0) { 
+		println("----------------------------------------");
+		println("Found errors during coreference resolution (definitions).\nPlease adjust your game description.");
+		return;
+	}
 	
 	// Check if all ID's have the correct type. 
 	checkTypes(implodedFile, lut);
-	if (errorsFound != 0) { println("Errors found during type checking. Please adjust your game description accordingly."); return; }
+	if (errorsFound != 0) { 
+		println("----------------------------------------");
+		println("Found errors during type checking.\nPlease adjust your object definition.");
+		return;
+	}
 	
 	// Add all referrals to the right definitions..	
 	lut = addRefs(implodedFile, lut);
-	if (errorsFound != 0) { println("Errors found during referral adding. Please adjust your game description accordingly."); return; }
+	if (errorsFound != 0) { println("Errors found during coreference resolution (references). Please adjust your game description accordingly."); return; }
 
-	println("Your game was correctly written. No errors found during grammar checking");
+	println("----------------------------------------");
+	println("No grammatical errors found in game definition.\nYour game was written correctly.");
 	return;
 }
 
@@ -95,7 +108,7 @@ LUT addDefs(CRDSII c, LUT lut)
 // Add constructor definition to LUT.
 LUT addDef(str name, loc l, str nodetype, LUT lut) {
 	if (name in lut.defs) {
-		println("Cannot define <name> as <nodetype>. Please use unique identifiers.");
+		println("ERROR :: Cannot define <name> as <nodetype>, since this variable name is already used somewhere else. Please use unique identifiers.");
 		errorsFound += 1;
 		return lut;
 	} else {
@@ -155,7 +168,7 @@ LUT addRef(ID use, LUT lut) {
 		if (use@location notin lut.refs[use.name]) {
 			lut.refs[use.name] += use@location;	
 		}
-	} catch NoSuchKey(): errorsFound += 1;
+	} catch NoSuchKey(): { println("ERROR ADD REF"); errorsFound += 1; }
 
 	return lut;
 }
@@ -166,11 +179,11 @@ LUT addAttrRefs(list[Exp] exps, LUT lut) {
 		if (var(id(str a)) := exp) {
 			try {
 				lut.refs[a] += exp@location;	
-			} catch NoSuchKey(): errorsFound += 1;
+			} catch NoSuchKey(): { println("ERROR ADD REF 2"); errorsFound += 1; }
 		} else if (val(real r) := exp) {
 			try {
 				lut.refs[toString(r)] += exp@location;	
-			} catch NoSuchKey(): errorsFound += 1;
+			} catch NoSuchKey(): { println("ERROR ADD REF 3 "); errorsFound += 1; }
 		}
 	}
 
@@ -183,7 +196,7 @@ LUT addScores(list[Scoring] scores, LUT lut) {
 		try {
 			if (s(str name, real r) := score) 
 				lut.refs[name] += score@location;	
-		} catch NoSuchKey(): errorsFound += 1;
+		} catch NoSuchKey(): { println("ERROR ADD REF 4"); errorsFound += 1; }
 
 		}
 	return lut;
@@ -197,9 +210,7 @@ void checkDefs(CRDSII c, LUT lut)
 	visit(c) {
 		case id(str name): {
 			if (name notin lut.defs) {
-				//println(name);
-				//println(lut.defs);
-				println("ERROR: Could not find: <name>");
+				println("ERROR :: You used <name> but this object was not defined correctly.");
 				errorsFound += 1;
 			}
 		}
@@ -240,23 +251,20 @@ LUT checkRef(ID use, str nodeType, LUT lut) {
 		if (nodeType == "typedef") {
 			list[str] typedefs = getTypedefs(lut);
 			if (lut.types[use.name] notin typedefs) {
-				println("Your references are incorrect. I expected an element of a typedef but got <lut.types[use.name]> on line <use@location.begin.line>, column <use@location.begin.column>");
+				println("ERROR :: Your references are incorrect. Expected an element of a typedef but got a <lut.types[use.name]> on line <use@location.begin.line>, column <use@location.begin.column>.");
 				errorsFound += 1;
 			}
 		} else if (lut.types[use.name] != nodeType) {
-			println("<lut.types[use.name]> :: <nodeType>");	
-			println("Your references are incorrect. I expected a <lut.types[use.name]> but got <nodeType> on line <use@location.begin.line>, column <use@location.begin.column>");
+			println("ERROR :: Your references are incorrect. Expected a <lut.types[use.name]> but got a <nodeType> on line <use@location.begin.line>, column <use@location.begin.column>.");
 			errorsFound += 1;
 		}
-	} catch NoSuchKey(): errorsFound += 1;
+	} catch NoSuchKey(): { println("ERROR"); errorsFound += 1; }
 
 	return lut;
 }	
 
 list[str] getTypedefs(LUT lut) {
 	list[str] typedefs = [];
-	
-
 }
 
 // Special case: Attributes (in Card, Token & Typedef)

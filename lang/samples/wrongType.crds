@@ -1,0 +1,21 @@
+game wrongType
+
+typedef location = [yellowpile, discardpile, drawpile]
+
+
+deck DrawPile = 
+[
+	B1 = [1],
+	B21 = [2],
+	BlueCard = [3],
+	BlueCard2 = [3],
+	BlueCard3 = [4]
+] drawpile none []
+
+team allPlayers = [A, B, C]
+players = [A has DrawPile, B has DrawPile, C has DrawPile]
+
+gameflow = [
+	turnorder = [BlueCard, B, C]
+	stage dealing = dealer [req shuffle DrawPile, req distribute 5 from DrawPile to [B, C]]
+]

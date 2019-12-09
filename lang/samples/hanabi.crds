@@ -79,7 +79,8 @@ players = [A has handPlayerA, B has handPlayerB, C has handPlayerC]
 
 
 rules = [ 
-	scoring = [ each = 1 ]
+	scoring = [ each = 1 ],
+	players = 2 to 5
 ]
 
 gameflow = [
