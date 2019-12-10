@@ -10,7 +10,6 @@ module lang::crds::analysis::generalmetrics
 
 import lang::crds::analysis::grammaranalysis;
 import lang::crds::basis::ast;
-import util::Prompt;
 import util::Math;
 
 
@@ -27,6 +26,7 @@ data Stats
  		 int decks, int cards,
  		 int stages,
  		 int tokens,
+ 		 int gamesize,
  		 list[str] gameflow);
  		 
 data InfoStages
@@ -40,15 +40,17 @@ data InfoStages
  * Main function to loop over tree created of the grammar.
  ******************************************************************************/
 void analysePrototype(loc gamefile) {
-	CRDSII AST = createTree(gamefile);
+	CRDSII AST = createTree(gamefile);	
 	
 	list[str] knownTeams = [];
 	list[str] knownPlayers = [];
 	bool scoring = false;
 	bool ii = false;
 	int knownCards = 0;
+	
 	ruleSet r = r(());
-	Stats s = stats(0, 0, 0, 0, 0, 0, 0, 0, []);
+	Stats s = stats(0, 0, 0, 0, 0, 0, 0, 0, 0, []);
+	s.gamesize = size(readFileLines(gamefile));
 	InfoStages is = is((), (), (), (), ());
 	
 	println("------------------------------------------------------------\nPossible improvements based on general card game properties:");
@@ -65,7 +67,9 @@ void analysePrototype(loc gamefile) {
 												  s.gameflow += [name.name];
 												  is = addStage(name.name, turns, is);
 												  checkConditions(cdns); }
-		
+		case basic(ID name, _, _):				{ s.gameflow += [name.name]; }	
+	
+	
 		case s(_,_):							{ scoring = true; }
 		case allcards(_): 						{ scoring = true; }
 		case none():							{ ii = true; }
@@ -80,7 +84,7 @@ void analysePrototype(loc gamefile) {
 		case Action a: 							{ r = addRule(r, a); }
 	}	
 			
-	checkPlayers(s);
+	checkPlayers(s, knownPlayers, knownTeams);
 	
 	if (scoring == false) println("There is no scoring principle. Please fix this if not intended.");
 	if (ii == false) println("Everyone can see all objects in play. Please fix this if not intended.");
@@ -117,8 +121,8 @@ list[str] checkTeam(list[str] knownTeams, list[ID] names) {
 	return knownTeams;
 }
 
-void checkPlayers(Stats s) {
-	if (s.teams != 0 && s.teams != s.players) 
+void checkPlayers(Stats s, list[str] knownPlayers, list[str] knownTeams) {
+	if (size(knownTeams) != 0 && knownTeams != knownPlayers)
 		println("Not all players are in a team. Please fix this if not intended.");
 	return;
 } 
@@ -264,6 +268,7 @@ void printStats(Stats s, InfoStages is) {
 	checkPlayercount(s);
 	
 	println("------------------------------------------------------------");
+	println("Your prototype was defined in <s.gamesize> lines of code.");
 	println("The following stats have been calculated for this prototype:\n------------------------------------------------------------");
 	println("Required # of players :: <s.minplayers> to <s.maxplayers>");
 	println("Total # of players    :: <s.players>");
@@ -285,7 +290,8 @@ void printStats(Stats s, InfoStages is) {
 	
 	println("\nDecisions per turn per stage ::");
 	for (stagename <- s.gameflow) 	
-	    println("-    <stagename> has a minimum of <is.mindecisions[stagename]> and a maximum of <is.maxdecisions[stagename]> decisions to make in each turn.");	
+		if (stagename in is.mindecisions)
+	    	println("-    <stagename> has a minimum of <is.mindecisions[stagename]> and a maximum of <is.maxdecisions[stagename]> decisions to make in each turn.");	
 	
 	return;
 }
